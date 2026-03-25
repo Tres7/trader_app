@@ -1,0 +1,32 @@
+# OS / editor
+.DS_Store
+.idea/
+*.iml
+
+# env files
+.env
+.env.*
+!.env.example
+
+# client
+/client/node_modules/
+/client/.expo/
+/client/.expo-shared/
+/client/dist/
+/client/web-build/
+/client/coverage/
+/client/npm-debug.*
+/client/yarn-debug.*
+/client/yarn-error.*
+/client/.vscode/
+
+# server
+/server/.gradle/
+/server/build/
+/server/out/
+/server/bin/
+/server/.idea/
+/server/.vscode/
+
+# Java
+*.class
