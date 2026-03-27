@@ -71,7 +71,7 @@ export function SignUpForm() {
                     onPress={() => {
                        // TODO: Navigate to sign in screen
                     }}>
-                    <Text className="text-sm underline underline-offset-4">S'inscrire</Text>
+                    <Text className="text-sm underline underline-offset-4">Se connecter</Text>
                 </Pressable>
             </View>
           <View className="flex-row items-center">
