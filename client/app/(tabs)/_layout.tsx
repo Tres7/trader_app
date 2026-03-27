@@ -3,7 +3,7 @@ import React from 'react';
 
 import { HapticTab } from '@/src/shared/ui/haptic-tab';
 import { IconSymbol } from '@/src/shared/ui/icons/icon-symbol';
-import { Colors } from '@/src/shared/constants/theme';
+import { THEME } from '@/src/shared/lib/theme';
 import { useColorScheme } from '@/src/shared/hooks/use-color-scheme';
 
 export default function TabLayout() {
@@ -12,7 +12,8 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        tabBarActiveTintColor:
+          colorScheme === 'dark' ? THEME.dark.primary : THEME.light.primary,
         headerShown: false,
         tabBarButton: HapticTab,
       }}>
@@ -27,7 +28,9 @@ export default function TabLayout() {
         name="explore"
         options={{
           title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="paperplane.fill" color={color} />
+          ),
         }}
       />
     </Tabs>
