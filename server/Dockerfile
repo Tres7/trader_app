@@ -1,5 +1,5 @@
 # BUILD
-FROM gradle:8.7-jdk21-alpine AS builder
+FROM gradle:9.4.0-jdk21-alpine AS builder
 WORKDIR /app
 
 # Copy first Gradle files for docker cache
@@ -9,10 +9,11 @@ COPY settings.gradle .
 COPY gradle/ gradle/
 COPY gradlew .
 
-RUN gradle dependencies --no-daemon -q
+RUN chmod +x gradlew
+RUN ./gradlew dependencies --no-daemon -q
 
 COPY src ./src
-RUN gradle bootJar --no-daemon -x test
+RUN ./gradlew bootJar --no-daemon -x test
 
 
 # RUNTIME

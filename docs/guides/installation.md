@@ -86,3 +86,53 @@ Le mode `--tunnel` permet de contourner les problèmes de réseau local, d'IP ou
 cd client
 npx expo start --tunnel
 ```
+
+## Configuration du fichier `.env` du serveur
+
+Le fichier `server/.env` doit être créé localement à partir de `server/.env.example`.
+
+Vous trouverez donc dans `server/.env.example` une base de code contenant les variables dont les conteneurs auront besoin:
+
+## Explication des variables
+
+`POSTGRES_DB`
+: nom de la base de données PostgreSQL créée au démarrage du conteneur.
+
+`POSTGRES_USER`
+: utilisateur PostgreSQL utilisé par l'application.
+
+`POSTGRES_PASSWORD`
+: mot de passe de l'utilisateur PostgreSQL.
+
+`PGADMIN_DEFAULT_EMAIL`
+: identifiant de connexion à l'interface web pgAdmin.
+
+`PGADMIN_DEFAULT_PASSWORD`
+: mot de passe de connexion à pgAdmin.
+
+`SPRING_DATASOURCE_URL`
+: URL de connexion JDBC du backend Spring Boot vers PostgreSQL.
+Ici, `db` correspond au nom du service PostgreSQL dans `compose.yaml`.
+
+`SPRING_DATASOURCE_USERNAME`
+: utilisateur utilisé par Spring Boot pour se connecter à la base.
+
+`SPRING_DATASOURCE_PASSWORD`
+: mot de passe utilisé par Spring Boot pour se connecter à la base.
+
+`SPRING_JPA_HIBERNATE_DDL_AUTO`
+: stratégie JPA au démarrage.
+La valeur `validate` permet de vérifier que le schéma correspond aux entités sans recréer la base.
+
+`SPRING_FLYWAY_ENABLED`
+: active Flyway pour les migrations de base de données.
+
+`SERVER_PORT`
+: port HTTP exposé par le backend Spring Boot dans le conteneur.
+
+## Étapes recommandées
+
+1. Copier `server/.env.example` vers `server/.env`
+2. Remplacer les valeurs `change_me`
+3. Vérifier que les identifiants PostgreSQL et Spring Boot correspondent
+4. Lancer ensuite les services avec Docker Compose

@@ -27,6 +27,6 @@
 /server/bin/
 /server/.idea/
 /server/.vscode/
-
+/server/.env
 # Java
 *.class
