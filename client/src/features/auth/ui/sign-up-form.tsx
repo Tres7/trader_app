@@ -1,4 +1,5 @@
 import { SocialConnections } from '@/src/features/auth/ui/social-connections';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { Button } from '@/src/shared/ui/primitives/button';
 import {
   Card,
@@ -12,14 +13,58 @@ import { Label } from '@/src/shared/ui/primitives/label';
 import { Separator } from '@/src/shared/ui/primitives/separator';
 import { Text } from '@/src/shared/ui/primitives/text';
 import * as React from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import { Platform, Pressable, TextInput, View } from 'react-native';
 
 export function SignUpForm() {
   const passwordInputRef = React.useRef<TextInput>(null);
+  const firstNameInputRef = React.useRef<TextInput>(null);
+  const lastNameInputRef = React.useRef<TextInput>(null);
+  const birthDateInputRef = React.useRef<TextInput>(null);
+  const countryInputRef = React.useRef<TextInput>(null);
+
+  const [birthDate, setBirthDate] = React.useState<Date | undefined>(undefined);
+  const [showDatePicker, setShowDatePicker] = React.useState(false);
+
+  function onFirstNameSubmitEditing() {
+    firstNameInputRef.current?.focus;
+  }
+
+  function onLastNameSubmitEditing() {
+    birthDateInputRef.current?.focus();
+  }
+
+  function onBirthDateSubmitEditing() {
+    countryInputRef.current?.focus();
+  }
+
+  function onCountrySubmitEditing() {
+    passwordInputRef.current?.focus();
+  }
 
   function onEmailSubmitEditing() {
     passwordInputRef.current?.focus();
   }
+
+  function openBirthDatePicker() {
+    setShowDatePicker(true);
+  }
+
+  function onBirthDateChange(_event: unknown, selectedDate?: Date) {
+    if (Platform.OS !== 'ios') {
+      setShowDatePicker(false);
+    }
+
+    if (selectedDate) {
+      setBirthDate(selectedDate);
+    }
+  }
+
+  function formatBirthDate(date?: Date) {
+    if (!date) return '';
+
+    return date.toLocaleDateString('fr-FR');
+  }
+
 
   function onSubmit() {
     // TODO: Submit form and navigate to protected screen if successful
@@ -37,6 +82,50 @@ export function SignUpForm() {
         <CardContent className="gap-6">
           <View className="gap-6">
             <View className="gap-1.5">
+              <Label htmlFor="firstName">Prénom</Label>
+              <Input
+                ref={firstNameInputRef}
+                id="firstName"
+                placeholder="Amah"
+                autoCapitalize="words"
+                onSubmitEditing={onFirstNameSubmitEditing}
+                returnKeyType="next"
+              />
+            </View>
+            <View className="gap-1.5">
+              <Label htmlFor="lastName">Nom</Label>
+              <Input
+                ref={lastNameInputRef}
+                id="lastName"
+                placeholder="KWACTCHAH"
+                autoCapitalize="words"
+                onSubmitEditing={onLastNameSubmitEditing}
+                returnKeyType="next"
+              />
+            </View>
+            <View className="gap-1.5">
+              <Label htmlFor="birthDate">Date de naissance</Label>
+              <Pressable onPress={openBirthDatePicker}>
+                <Input
+                  id="birthDate"
+                  placeholder="JJ/MM/AAAA"
+                  value={formatBirthDate(birthDate)}
+                  editable={false}
+                  pointerEvents="none"
+                />
+              </Pressable>
+
+              {showDatePicker && (
+                <DateTimePicker
+                  value={birthDate ?? new Date(2000, 0, 1)}
+                  mode="date"
+                  display="default"
+                  maximumDate={new Date()}
+                  onChange={onBirthDateChange}
+                />
+              )}
+            </View>
+            <View className="gap-1.5">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -47,6 +136,17 @@ export function SignUpForm() {
                 onSubmitEditing={onEmailSubmitEditing}
                 returnKeyType="next"
                 submitBehavior="submit"
+              />
+            </View>
+            <View className="gap-1.5">
+              <Label htmlFor="country">Pays</Label>
+              <Input
+                ref={countryInputRef}
+                id="country"
+                placeholder="Togo"
+                autoCapitalize="words"
+                onSubmitEditing={onCountrySubmitEditing}
+                returnKeyType="next"
               />
             </View>
             <View className="gap-1.5">

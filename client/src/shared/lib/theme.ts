@@ -98,4 +98,4 @@ export const Colors = {
     tabIconDefault: THEME.dark.mutedForeground,
     tabIconSelected: THEME.dark.primary,
   },
-};
+}; 
