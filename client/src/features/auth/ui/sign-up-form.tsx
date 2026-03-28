@@ -68,7 +68,12 @@ export function SignUpForm() {
 
 
   function onSubmit() {
-    // TODO: Submit form and navigate to protected screen if successful
+      router.push({
+        pathname: '/verify-email',
+        params: {
+          email: 'm@example.com',
+      },
+    });
   }
 
   return (
