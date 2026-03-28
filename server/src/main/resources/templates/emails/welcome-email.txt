@@ -1,0 +1,8 @@
+Bonjour {{firstName}},
+
+Votre compte a bien ete cree.
+
+Bienvenue sur traderapp.
+
+Cordialement,
+L'equipe traderapp.

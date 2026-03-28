@@ -1,0 +1,8 @@
+Bonjour {{firstName}},
+
+Voici votre code de verification : {{verificationCode}}
+
+Attention ! Il expire dans 15 minutes.
+
+Cordialement,
+L'equipe traderapp.

@@ -51,19 +51,6 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
-  # consumer:
-  #   build:
-  #     context: ./server
-  #   command: python manage.py consume_events
-  #   volumes:
-  #     - ./server:/app
-  #   env_file:
-  #     - server/.env
-  #   depends_on:
-  #     - rabbitmq
-  #     - db
-  #   restart: on-failure
-
 volumes:
   traderapp_db:
   rabbitmq_data:
