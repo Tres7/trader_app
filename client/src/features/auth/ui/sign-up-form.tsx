@@ -1,6 +1,7 @@
 import { SocialConnections } from '@/src/features/auth/ui/social-connections';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Button } from '@/src/shared/ui/primitives/button';
+import { router } from 'expo-router';
 import {
   Card,
   CardContent,
@@ -169,7 +170,7 @@ export function SignUpForm() {
             <Text className="text-sm">Vous avez déjà un compte?</Text>
                 <Pressable
                     onPress={() => {
-                       // TODO: Navigate to sign in screen
+                       router.push('/sign-in');
                     }}>
                     <Text className="text-sm underline underline-offset-4">Se connecter</Text>
                 </Pressable>
