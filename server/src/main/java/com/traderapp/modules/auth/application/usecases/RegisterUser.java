@@ -2,6 +2,8 @@ package com.traderapp.modules.auth.application.usecases;
 
 import java.time.LocalDateTime;
 
+import org.springframework.stereotype.Service;
+
 import com.traderapp.modules.auth.application.commands.RegisterUserCommand;
 import com.traderapp.modules.auth.application.service.PasswordHasher;
 import com.traderapp.modules.auth.domain.entities.User;
@@ -14,6 +16,7 @@ import com.traderapp.modules.auth.domain.valueObjects.LastName;
 import com.traderapp.modules.auth.domain.valueObjects.PasswordHash;
 import com.traderapp.modules.auth.domain.valueObjects.UserId;
 
+@Service
 public class RegisterUser {
     private final UserRepository userRepository;
     private final PasswordHasher passwordHasher;
