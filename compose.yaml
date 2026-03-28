@@ -38,5 +38,32 @@ services:
       db:
         condition: service_healthy
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    env_file:
+      - server/.env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  # consumer:
+  #   build:
+  #     context: ./server
+  #   command: python manage.py consume_events
+  #   volumes:
+  #     - ./server:/app
+  #   env_file:
+  #     - server/.env
+  #   depends_on:
+  #     - rabbitmq
+  #     - db
+  #   restart: on-failure
+
 volumes:
   traderapp_db:
+  rabbitmq_data:
