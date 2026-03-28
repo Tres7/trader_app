@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/trader_app_test}
+    username: ${TEST_DB_USERNAME:postgres}
+    password: ${TEST_DB_PASSWORD:postgres}
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+
+  rabbitmq:
+    host: ${TEST_RABBITMQ_HOST:localhost}
+    port: ${TEST_RABBITMQ_PORT:5672}
+    username: ${TEST_RABBITMQ_USERNAME:guest}
+    password: ${TEST_RABBITMQ_PASSWORD:guest}
+
+logging:
+  level:
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
