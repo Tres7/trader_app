@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ import com.traderapp.modules.auth.application.usecases.GetCurrentUser;
 import com.traderapp.modules.auth.application.usecases.Login;
 import com.traderapp.modules.auth.application.usecases.RegisterUser;
 import com.traderapp.modules.auth.application.usecases.ResendVerificationCode;
+import com.traderapp.modules.auth.application.usecases.UpdateCurrentUserProfile;
 import com.traderapp.modules.auth.application.usecases.VerifyEmail;
 import com.traderapp.modules.auth.domain.entities.User;
 import com.traderapp.modules.auth.infrastructure.http.responses.GetCurrentUserResponse;
@@ -29,6 +31,7 @@ import com.traderapp.modules.auth.presentation.rest.requests.LoginRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.LoginResponse;
 import com.traderapp.modules.auth.presentation.rest.requests.RegisterUserRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.ResendVerificationCodeRequest;
+import com.traderapp.modules.auth.presentation.rest.requests.UpdateCurrentUserProfileRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.VerifyEmailRequest;
 
 @RestController
@@ -39,13 +42,16 @@ public class AuthController {
     private final VerifyEmail verifyEmail;
     private final Login login;
     private final GetCurrentUser getCurrentUser;
+    private final UpdateCurrentUserProfile updateCurrentUserProfile;
 
-    public AuthController(RegisterUser registerUser, VerifyEmail verifyEmail, ResendVerificationCode resendVerificationCode, Login login, GetCurrentUser getCurrentUser) {
+
+    public AuthController(RegisterUser registerUser, VerifyEmail verifyEmail, ResendVerificationCode resendVerificationCode, Login login, GetCurrentUser getCurrentUser, UpdateCurrentUserProfile updateCurrentUserProfile) {
         this.registerUser = registerUser;
         this.verifyEmail = verifyEmail;
         this.resendVerificationCode = resendVerificationCode;
         this.login = login;
         this.getCurrentUser = getCurrentUser;
+        this.updateCurrentUserProfile = updateCurrentUserProfile;
     }
 
     @PostMapping("/register")
@@ -143,4 +149,28 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @PatchMapping("/me")
+    public ResponseEntity<GetCurrentUserResponse> updateMe(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+            @RequestBody UpdateCurrentUserProfileRequest request
+    ) {
+        User user = updateCurrentUserProfile.execute(
+                authenticatedUser.userId(),
+                request.firstName(),
+                request.lastName(),
+                request.birthDate(),
+                request.country()
+        );
+
+        GetCurrentUserResponse response = new GetCurrentUserResponse(
+                user.getId().value().toString(),
+                user.getFirstName().value(),
+                user.getLastName().value(),
+                user.getEmail().value(),
+                user.getCountry().value(),
+                user.getBirthDate().value().toString(),
+                user.isEmailVerified()
+        );
+        return ResponseEntity.ok(response);
+    }
 }
