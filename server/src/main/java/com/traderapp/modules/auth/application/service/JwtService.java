@@ -4,4 +4,11 @@ import com.traderapp.modules.auth.domain.entities.User;
 
 public interface JwtService {
     String generateAccessToken(User user);
+    
+    String extractUserId(String token);
+
+    String extractEmail(String token);
+
+    boolean isTokenValid(String token);
+
 }

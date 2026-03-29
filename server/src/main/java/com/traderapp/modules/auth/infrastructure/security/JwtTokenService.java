@@ -5,12 +5,16 @@ import org.springframework.stereotype.Service;
 import com.traderapp.modules.auth.application.service.JwtService;
 import com.traderapp.modules.auth.domain.entities.User;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Map;
+
+import javax.crypto.SecretKey;
+
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +48,39 @@ public class JwtTokenService implements JwtService {
             .expiration(Date.from(expiresAt))
             .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
             .compact();
+    }
+
+    @Override
+    public String extractUserId(String token) {
+        return extractAllClaims(token).getSubject();
+    }
+
+    @Override
+    public String extractEmail(String token) {
+        return extractAllClaims(token).get("email", String.class);
+    }
+
+    @Override
+    public boolean isTokenValid(String token) {
+        try {
+            Claims claims = extractAllClaims(token);
+            Date expiration = claims.getExpiration();
+            return expiration != null && expiration.after(new Date());
+        } catch (Exception exception) {
+            return false;
+        }
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+            .verifyWith(getSigningKey())
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
+    }
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
 }
