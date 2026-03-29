@@ -7,9 +7,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.traderapp.modules.auth.application.commands.LoginCommand;
 import com.traderapp.modules.auth.application.commands.RegisterUserCommand;
 import com.traderapp.modules.auth.application.commands.ResendVerificationCodeCommand;
 import com.traderapp.modules.auth.application.commands.VerifyEmailCommand;
+import com.traderapp.modules.auth.application.dto.LoginResult;
+import com.traderapp.modules.auth.application.usecases.Login;
 import com.traderapp.modules.auth.application.usecases.RegisterUser;
 import com.traderapp.modules.auth.application.usecases.ResendVerificationCode;
 import com.traderapp.modules.auth.application.usecases.VerifyEmail;
@@ -17,6 +20,8 @@ import com.traderapp.modules.auth.domain.entities.User;
 import com.traderapp.modules.auth.infrastructure.http.responses.RegisterUserResponse;
 import com.traderapp.modules.auth.infrastructure.http.responses.ResendVerificationCodeResponse;
 import com.traderapp.modules.auth.infrastructure.http.responses.VerifyEmailResponse;
+import com.traderapp.modules.auth.presentation.rest.requests.LoginRequest;
+import com.traderapp.modules.auth.presentation.rest.requests.LoginResponse;
 import com.traderapp.modules.auth.presentation.rest.requests.RegisterUserRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.ResendVerificationCodeRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.VerifyEmailRequest;
@@ -27,11 +32,13 @@ public class AuthController {
     private final ResendVerificationCode resendVerificationCode;
     private final RegisterUser registerUser;
     private final VerifyEmail verifyEmail;
+    private final Login login;
 
-    public AuthController(RegisterUser registerUser, VerifyEmail verifyEmail, ResendVerificationCode resendVerificationCode) {
+    public AuthController(RegisterUser registerUser, VerifyEmail verifyEmail, ResendVerificationCode resendVerificationCode, Login login) {
         this.registerUser = registerUser;
         this.verifyEmail = verifyEmail;
         this.resendVerificationCode = resendVerificationCode;
+        this.login = login;
     }
 
     @PostMapping("/register")
@@ -90,4 +97,23 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        LoginCommand command = new LoginCommand(
+                request.email(),
+                request.password()
+        );
+
+        LoginResult result = login.execute(command);
+
+        LoginResponse response = new LoginResponse(
+                result.accessToken(),
+                "Bearer",
+                result.userId(),
+                result.email(),
+                result.firstName()
+        );
+
+        return ResponseEntity.ok(response);
+    }
 }

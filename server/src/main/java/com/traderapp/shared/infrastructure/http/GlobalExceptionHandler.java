@@ -1,7 +1,9 @@
 package com.traderapp.shared.infrastructure.http;
 
 import com.traderapp.modules.auth.domain.exceptions.EmailAlreadyVerifiedException;
+import com.traderapp.modules.auth.domain.exceptions.EmailNotVerifiedException;
 import com.traderapp.modules.auth.domain.exceptions.ExpiredVerificationCodeException;
+import com.traderapp.modules.auth.domain.exceptions.InvalidCredentialsException;
 import com.traderapp.modules.auth.domain.exceptions.InvalidVerificationCodeException;
 import com.traderapp.modules.auth.domain.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException exception) {
         return buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCredentials(InvalidCredentialsException exception) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, exception.getMessage());
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<ApiErrorResponse> handleEmailNotVerified(EmailNotVerifiedException exception) {
+        return buildResponse(HttpStatus.FORBIDDEN, exception.getMessage());
     }
 
     private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message) {
