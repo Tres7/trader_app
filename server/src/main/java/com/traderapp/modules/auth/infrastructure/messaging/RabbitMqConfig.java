@@ -18,6 +18,9 @@ public class RabbitMqConfig {
     public static final String NOTIFICATION_EXCHANGE = "notification.exchange";
     public static final String VERIFICATION_EMAIL_QUEUE = "notification.verification-email.queue";
     public static final String USER_REGISTERED_ROUTING_KEY = "notification.email.verification";
+    public static final String WELCOME_EMAIL_QUEUE = "notification.welcome-email.queue";
+    public static final String USER_EMAIL_VERIFIED_ROUTING_KEY = "notification.email.welcome";
+
 
     @Bean
     public DirectExchange notificationExchange() {
@@ -30,6 +33,12 @@ public class RabbitMqConfig {
     }
 
     @Bean
+    public Queue welcomeEmailQueue() {
+        return new Queue(WELCOME_EMAIL_QUEUE);
+    }
+
+
+    @Bean
     public Binding verificationEmailBinding(
             Queue verificationEmailQueue,
             DirectExchange notificationExchange
@@ -38,6 +47,17 @@ public class RabbitMqConfig {
                 .bind(verificationEmailQueue)
                 .to(notificationExchange)
                 .with(USER_REGISTERED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding welcomeEmailBinding(
+            Queue welcomeEmailQueue,
+            DirectExchange notificationExchange
+    ) {
+        return BindingBuilder
+                .bind(welcomeEmailQueue)
+                .to(notificationExchange)
+                .with(USER_EMAIL_VERIFIED_ROUTING_KEY);
     }
 
     @Bean

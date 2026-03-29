@@ -14,6 +14,5 @@ public class SendVerificationEmail {
 
     public void execute(String to, String firstName, String verificationCode) {
         emailSender.sendVerificationEmail(to, firstName, verificationCode);
-        emailSender.sendWelcomeEmail(to, firstName);
     }
 }

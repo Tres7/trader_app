@@ -3,6 +3,7 @@ package com.traderapp.modules.auth.infrastructure.messaging;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
+import com.traderapp.modules.auth.application.events.UserEmailVerifiedEvent;
 import com.traderapp.modules.auth.application.events.UserRegisteredEvent;
 import com.traderapp.modules.auth.application.ports.output.AuthEventPublisher;
 
@@ -23,5 +24,14 @@ public class RabbitMqAuthEventPublisher implements AuthEventPublisher {
                 event
         );
     }
-    
+
+    @Override
+    public void publishUserEmailVerified(UserEmailVerifiedEvent event) {
+        rabbitTemplate.convertAndSend(
+                RabbitMqConfig.NOTIFICATION_EXCHANGE,
+                RabbitMqConfig.USER_EMAIL_VERIFIED_ROUTING_KEY,
+                event
+        );
+    }
+
 }
