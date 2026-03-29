@@ -9,5 +9,7 @@ public interface EmailVerificationCodeRepository {
     EmailVerificationCode save(EmailVerificationCode emailVerificationCode);
 
     Optional<EmailVerificationCode> findByUserIdAndCode(UUID userId, String code);
+
+    void markAllAsUsedByUserId(java.util.UUID userId);
     
 }

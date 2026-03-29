@@ -4,6 +4,7 @@ import com.traderapp.modules.auth.domain.entities.EmailVerificationCode;
 import com.traderapp.modules.auth.domain.repositories.EmailVerificationCodeRepository;
 import com.traderapp.modules.auth.infrastructure.persistence.entities.EmailVerificationCodeEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -29,6 +30,13 @@ public class JpaEmailVerificationCodeRepository implements EmailVerificationCode
         return springDataRepository.findByUserIdAndCode(userId, code)
                 .map(this::toDomain);
     }
+
+    @Override
+    @Transactional
+    public void markAllAsUsedByUserId(UUID userId) {
+        springDataRepository.markAllAsUsedByUserId(userId);
+    }
+
 
     private EmailVerificationCodeEntity toEntity(EmailVerificationCode emailVerificationCode) {
         return new EmailVerificationCodeEntity(

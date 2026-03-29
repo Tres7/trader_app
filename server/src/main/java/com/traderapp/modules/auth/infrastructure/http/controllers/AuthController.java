@@ -8,24 +8,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.traderapp.modules.auth.application.commands.RegisterUserCommand;
+import com.traderapp.modules.auth.application.commands.ResendVerificationCodeCommand;
 import com.traderapp.modules.auth.application.commands.VerifyEmailCommand;
 import com.traderapp.modules.auth.application.usecases.RegisterUser;
+import com.traderapp.modules.auth.application.usecases.ResendVerificationCode;
 import com.traderapp.modules.auth.application.usecases.VerifyEmail;
 import com.traderapp.modules.auth.domain.entities.User;
 import com.traderapp.modules.auth.infrastructure.http.responses.RegisterUserResponse;
+import com.traderapp.modules.auth.infrastructure.http.responses.ResendVerificationCodeResponse;
 import com.traderapp.modules.auth.infrastructure.http.responses.VerifyEmailResponse;
 import com.traderapp.modules.auth.presentation.rest.requests.RegisterUserRequest;
+import com.traderapp.modules.auth.presentation.rest.requests.ResendVerificationCodeRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.VerifyEmailRequest;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
+    private final ResendVerificationCode resendVerificationCode;
     private final RegisterUser registerUser;
     private final VerifyEmail verifyEmail;
 
-    public AuthController(RegisterUser registerUser, VerifyEmail verifyEmail) {
+    public AuthController(RegisterUser registerUser, VerifyEmail verifyEmail, ResendVerificationCode resendVerificationCode) {
         this.registerUser = registerUser;
         this.verifyEmail = verifyEmail;
+        this.resendVerificationCode = resendVerificationCode;
     }
 
     @PostMapping("/register")
@@ -68,4 +74,20 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/resend-verification-code")
+    public ResponseEntity<ResendVerificationCodeResponse> resendVerificationCode(
+            @RequestBody ResendVerificationCodeRequest request) {
+        ResendVerificationCodeCommand command = new ResendVerificationCodeCommand(
+            request.email()
+        );
+        User user = resendVerificationCode.execute(command);
+
+        ResendVerificationCodeResponse response = new ResendVerificationCodeResponse(
+                user.getEmail().value(),
+                "Verification code resent successfully"
+        );
+        return ResponseEntity.ok(response);
+    }
+
 }
