@@ -43,7 +43,7 @@ public class VerifyEmail {
 
         EmailVerificationCode verificationCode = emailVerificationCodeRepository
                 .findByUserIdAndCode(user.getId().value(), command.code())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid verification code"));
+                .orElseThrow(() -> new InvalidVerificationCodeException("Invalid verification code"));
 
 
         if (verificationCode.isUsed()) {
