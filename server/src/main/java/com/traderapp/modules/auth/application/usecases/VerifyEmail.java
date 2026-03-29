@@ -5,6 +5,10 @@ import com.traderapp.modules.auth.application.events.UserEmailVerifiedEvent;
 import com.traderapp.modules.auth.application.ports.output.AuthEventPublisher;
 import com.traderapp.modules.auth.domain.entities.EmailVerificationCode;
 import com.traderapp.modules.auth.domain.entities.User;
+import com.traderapp.modules.auth.domain.exceptions.EmailAlreadyVerifiedException;
+import com.traderapp.modules.auth.domain.exceptions.ExpiredVerificationCodeException;
+import com.traderapp.modules.auth.domain.exceptions.InvalidVerificationCodeException;
+import com.traderapp.modules.auth.domain.exceptions.UserNotFoundException;
 import com.traderapp.modules.auth.domain.repositories.EmailVerificationCodeRepository;
 import com.traderapp.modules.auth.domain.repositories.UserRepository;
 import com.traderapp.modules.auth.domain.valueObjects.Email;
@@ -31,14 +35,23 @@ public class VerifyEmail {
         Email email = new Email(command.email());
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
+        if (user.isEmailVerified()) {
+            throw new EmailAlreadyVerifiedException("Email is already verified");
+        }
 
         EmailVerificationCode verificationCode = emailVerificationCodeRepository
                 .findByUserIdAndCode(user.getId().value(), command.code())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid verification code"));
 
-        if (!verificationCode.canBeUsed()) {
-            throw new IllegalArgumentException("Verification code is invalid or expired");
+
+        if (verificationCode.isUsed()) {
+            throw new InvalidVerificationCodeException("Verification code has already been used");
+        }
+
+        if (verificationCode.isExpired()) {
+            throw new ExpiredVerificationCodeException("Verification code has expired");
         }
 
         verificationCode.markAsUsed();
