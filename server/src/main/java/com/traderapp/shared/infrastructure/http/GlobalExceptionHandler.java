@@ -4,6 +4,7 @@ import com.traderapp.modules.auth.domain.exceptions.EmailAlreadyVerifiedExceptio
 import com.traderapp.modules.auth.domain.exceptions.EmailNotVerifiedException;
 import com.traderapp.modules.auth.domain.exceptions.ExpiredVerificationCodeException;
 import com.traderapp.modules.auth.domain.exceptions.InvalidCredentialsException;
+import com.traderapp.modules.auth.domain.exceptions.InvalidCurrentPasswordException;
 import com.traderapp.modules.auth.domain.exceptions.InvalidVerificationCodeException;
 import com.traderapp.modules.auth.domain.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -50,6 +51,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleEmailNotVerified(EmailNotVerifiedException exception) {
         return buildResponse(HttpStatus.FORBIDDEN, exception.getMessage());
     }
+
+    @ExceptionHandler(InvalidCurrentPasswordException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCurrentPassword(InvalidCurrentPasswordException exception) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, exception.getMessage());
+    }
+
 
     private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message) {
         ApiErrorResponse response = new ApiErrorResponse(

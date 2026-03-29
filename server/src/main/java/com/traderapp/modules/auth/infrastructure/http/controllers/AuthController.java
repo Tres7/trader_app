@@ -20,17 +20,20 @@ import com.traderapp.modules.auth.application.usecases.GetCurrentUser;
 import com.traderapp.modules.auth.application.usecases.Login;
 import com.traderapp.modules.auth.application.usecases.RegisterUser;
 import com.traderapp.modules.auth.application.usecases.ResendVerificationCode;
+import com.traderapp.modules.auth.application.usecases.UpdateCurrentUserPassword;
 import com.traderapp.modules.auth.application.usecases.UpdateCurrentUserProfile;
 import com.traderapp.modules.auth.application.usecases.VerifyEmail;
 import com.traderapp.modules.auth.domain.entities.User;
 import com.traderapp.modules.auth.infrastructure.http.responses.GetCurrentUserResponse;
 import com.traderapp.modules.auth.infrastructure.http.responses.RegisterUserResponse;
 import com.traderapp.modules.auth.infrastructure.http.responses.ResendVerificationCodeResponse;
+import com.traderapp.modules.auth.infrastructure.http.responses.UpdateCurrentUserPasswordResponse;
 import com.traderapp.modules.auth.infrastructure.http.responses.VerifyEmailResponse;
 import com.traderapp.modules.auth.presentation.rest.requests.LoginRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.LoginResponse;
 import com.traderapp.modules.auth.presentation.rest.requests.RegisterUserRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.ResendVerificationCodeRequest;
+import com.traderapp.modules.auth.presentation.rest.requests.UpdateCurrentUserPasswordRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.UpdateCurrentUserProfileRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.VerifyEmailRequest;
 
@@ -43,15 +46,18 @@ public class AuthController {
     private final Login login;
     private final GetCurrentUser getCurrentUser;
     private final UpdateCurrentUserProfile updateCurrentUserProfile;
+    private final UpdateCurrentUserPassword updateCurrentUserPassword;
 
 
-    public AuthController(RegisterUser registerUser, VerifyEmail verifyEmail, ResendVerificationCode resendVerificationCode, Login login, GetCurrentUser getCurrentUser, UpdateCurrentUserProfile updateCurrentUserProfile) {
+
+    public AuthController(RegisterUser registerUser, VerifyEmail verifyEmail, ResendVerificationCode resendVerificationCode, Login login, GetCurrentUser getCurrentUser, UpdateCurrentUserProfile updateCurrentUserProfile, UpdateCurrentUserPassword updateCurrentUserPassword) {
         this.registerUser = registerUser;
         this.verifyEmail = verifyEmail;
         this.resendVerificationCode = resendVerificationCode;
         this.login = login;
         this.getCurrentUser = getCurrentUser;
         this.updateCurrentUserProfile = updateCurrentUserProfile;
+        this.updateCurrentUserPassword = updateCurrentUserPassword;
     }
 
     @PostMapping("/register")
@@ -173,4 +179,23 @@ public class AuthController {
         );
         return ResponseEntity.ok(response);
     }
+
+    @PatchMapping("/me/password")
+    public ResponseEntity<UpdateCurrentUserPasswordResponse> updatePassword(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+            @RequestBody UpdateCurrentUserPasswordRequest request
+    ) {
+        updateCurrentUserPassword.execute(
+                authenticatedUser.userId(),
+                request.currentPassword(),
+                request.newPassword()
+        );
+
+        UpdateCurrentUserPasswordResponse response = new UpdateCurrentUserPasswordResponse(
+                "Password updated successfully"
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
 }
