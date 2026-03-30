@@ -1,6 +1,6 @@
 Bonjour {{firstName}},
 
-Voici votre code de verification : {{verificationCode}}
+Voici votre code de vérification : {{verificationCode}}
 
 Attention ! Il expire dans 15 minutes.
 

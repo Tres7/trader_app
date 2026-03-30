@@ -14,6 +14,7 @@ import com.traderapp.modules.auth.application.commands.ForgotPasswordCommand;
 import com.traderapp.modules.auth.application.commands.LoginCommand;
 import com.traderapp.modules.auth.application.commands.RegisterUserCommand;
 import com.traderapp.modules.auth.application.commands.ResendVerificationCodeCommand;
+import com.traderapp.modules.auth.application.commands.ResetPasswordCommand;
 import com.traderapp.modules.auth.application.commands.VerifyEmailCommand;
 import com.traderapp.modules.auth.application.dto.AuthenticatedUser;
 import com.traderapp.modules.auth.application.dto.LoginResult;
@@ -22,6 +23,7 @@ import com.traderapp.modules.auth.application.usecases.GetCurrentUser;
 import com.traderapp.modules.auth.application.usecases.Login;
 import com.traderapp.modules.auth.application.usecases.RegisterUser;
 import com.traderapp.modules.auth.application.usecases.ResendVerificationCode;
+import com.traderapp.modules.auth.application.usecases.ResetPassword;
 import com.traderapp.modules.auth.application.usecases.UpdateCurrentUserPassword;
 import com.traderapp.modules.auth.application.usecases.UpdateCurrentUserProfile;
 import com.traderapp.modules.auth.application.usecases.VerifyEmail;
@@ -30,6 +32,7 @@ import com.traderapp.modules.auth.infrastructure.http.responses.ForgotPasswordRe
 import com.traderapp.modules.auth.infrastructure.http.responses.GetCurrentUserResponse;
 import com.traderapp.modules.auth.infrastructure.http.responses.RegisterUserResponse;
 import com.traderapp.modules.auth.infrastructure.http.responses.ResendVerificationCodeResponse;
+import com.traderapp.modules.auth.infrastructure.http.responses.ResetPasswordResponse;
 import com.traderapp.modules.auth.infrastructure.http.responses.UpdateCurrentUserPasswordResponse;
 import com.traderapp.modules.auth.infrastructure.http.responses.VerifyEmailResponse;
 import com.traderapp.modules.auth.presentation.rest.requests.ForgotPasswordRequest;
@@ -37,6 +40,7 @@ import com.traderapp.modules.auth.presentation.rest.requests.LoginRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.LoginResponse;
 import com.traderapp.modules.auth.presentation.rest.requests.RegisterUserRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.ResendVerificationCodeRequest;
+import com.traderapp.modules.auth.presentation.rest.requests.ResetPasswordRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.UpdateCurrentUserPasswordRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.UpdateCurrentUserProfileRequest;
 import com.traderapp.modules.auth.presentation.rest.requests.VerifyEmailRequest;
@@ -52,6 +56,8 @@ public class AuthController {
     private final UpdateCurrentUserProfile updateCurrentUserProfile;
     private final UpdateCurrentUserPassword updateCurrentUserPassword;
     private final ForgotPassword forgotPassword;
+    private final ResetPassword resetPassword;
+
 
         public AuthController(
                 RegisterUser registerUser, 
@@ -61,7 +67,8 @@ public class AuthController {
                 GetCurrentUser getCurrentUser, 
                 UpdateCurrentUserProfile updateCurrentUserProfile, 
                 UpdateCurrentUserPassword updateCurrentUserPassword, 
-                ForgotPassword forgotPassword) {
+                ForgotPassword forgotPassword,
+                ResetPassword resetPassword) {
 
                 this.registerUser = registerUser;
                 this.verifyEmail = verifyEmail;
@@ -71,6 +78,7 @@ public class AuthController {
                 this.updateCurrentUserProfile = updateCurrentUserProfile;
                 this.updateCurrentUserPassword = updateCurrentUserPassword;
                 this.forgotPassword = forgotPassword;
+                this.resetPassword = resetPassword;
         }
 
         @PostMapping("/register")
@@ -227,4 +235,25 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
         }
+
+        @PostMapping("/reset-password")
+        public ResponseEntity<ResetPasswordResponse> resetPassword(
+                @RequestBody ResetPasswordRequest request
+        ) {
+        ResetPasswordCommand command = new ResetPasswordCommand(
+                request.email(),
+                request.code(),
+                request.newPassword()
+        );
+
+        User user = resetPassword.execute(command);
+
+        ResetPasswordResponse response = new ResetPasswordResponse(
+                user.getEmail().value(),
+                "Password reset successfully"
+        );
+
+        return ResponseEntity.ok(response);
+        }
+
 }

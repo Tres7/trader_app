@@ -79,4 +79,20 @@ public class GmailEmailSender implements EmailSender {
         mailSender.send(message);
     }
 
+    @Override
+    public void sendPasswordResetConfirmationEmail(String to, String firstName) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(from);
+        message.setTo(to);
+        message.setSubject("Votre mot de passe a ete reinitialise");
+
+        String body = emailTemplateRenderer.render(
+                "templates/emails/password-reset-confirmation-email.txt",
+                Map.of("firstName", firstName)
+        );
+
+        message.setText(body);
+        mailSender.send(message);
+    }
+
 }

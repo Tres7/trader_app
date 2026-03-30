@@ -7,5 +7,7 @@ public interface EmailSender {
     void sendWelcomeEmail(String to, String firstName);
 
     void sendPasswordResetEmail(String to, String firstName, String resetCode);
-    
+
+    void sendPasswordResetConfirmationEmail(String to, String firstName);
+
 }

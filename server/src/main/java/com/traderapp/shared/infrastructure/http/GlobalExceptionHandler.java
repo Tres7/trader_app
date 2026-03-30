@@ -2,9 +2,11 @@ package com.traderapp.shared.infrastructure.http;
 
 import com.traderapp.modules.auth.domain.exceptions.EmailAlreadyVerifiedException;
 import com.traderapp.modules.auth.domain.exceptions.EmailNotVerifiedException;
+import com.traderapp.modules.auth.domain.exceptions.ExpiredPasswordResetCodeException;
 import com.traderapp.modules.auth.domain.exceptions.ExpiredVerificationCodeException;
 import com.traderapp.modules.auth.domain.exceptions.InvalidCredentialsException;
 import com.traderapp.modules.auth.domain.exceptions.InvalidCurrentPasswordException;
+import com.traderapp.modules.auth.domain.exceptions.InvalidPasswordResetCodeException;
 import com.traderapp.modules.auth.domain.exceptions.InvalidVerificationCodeException;
 import com.traderapp.modules.auth.domain.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -57,6 +59,15 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, exception.getMessage());
     }
 
+    @ExceptionHandler(InvalidPasswordResetCodeException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidPasswordResetCode(InvalidPasswordResetCodeException exception) {
+        return buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
+    @ExceptionHandler(ExpiredPasswordResetCodeException.class)
+    public ResponseEntity<ApiErrorResponse> handleExpiredPasswordResetCode(ExpiredPasswordResetCodeException exception) {
+        return buildResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
 
     private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message) {
         ApiErrorResponse response = new ApiErrorResponse(

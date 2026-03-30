@@ -3,6 +3,7 @@ package com.traderapp.modules.auth.infrastructure.messaging;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
+import com.traderapp.modules.auth.application.events.PasswordResetCompletedEvent;
 import com.traderapp.modules.auth.application.events.PasswordResetRequestedEvent;
 import com.traderapp.modules.auth.application.events.UserEmailVerifiedEvent;
 import com.traderapp.modules.auth.application.events.UserRegisteredEvent;
@@ -43,5 +44,15 @@ public class RabbitMqAuthEventPublisher implements AuthEventPublisher {
             event
         );
     }
+
+    @Override
+    public void publishPasswordResetCompleted(PasswordResetCompletedEvent event) {
+        rabbitTemplate.convertAndSend(
+                RabbitMqConfig.NOTIFICATION_EXCHANGE,
+                RabbitMqConfig.PASSWORD_RESET_COMPLETED_ROUTING_KEY,
+                event
+        );
+    }
+
 
 }

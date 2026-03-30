@@ -22,6 +22,9 @@ public class RabbitMqConfig {
     public static final String USER_EMAIL_VERIFIED_ROUTING_KEY = "notification.email.welcome";
     public static final String PASSWORD_RESET_QUEUE = "notification.password-reset.queue";
     public static final String PASSWORD_RESET_ROUTING_KEY = "notification.password.reset";
+    public static final String PASSWORD_RESET_COMPLETED_QUEUE = "notification.password-reset-completed.queue";
+    public static final String PASSWORD_RESET_COMPLETED_ROUTING_KEY = "notification.password.reset.completed";
+
 
 
 
@@ -44,6 +47,12 @@ public class RabbitMqConfig {
     public Queue passwordResetQueue() {
         return new Queue(PASSWORD_RESET_QUEUE);
     }
+
+    @Bean
+    public Queue passwordResetCompletedQueue() {
+        return new Queue(PASSWORD_RESET_COMPLETED_QUEUE);
+    }
+
 
 
     @Bean
@@ -77,6 +86,17 @@ public class RabbitMqConfig {
                 .bind(passwordResetQueue)
                 .to(notificationExchange)
                 .with(PASSWORD_RESET_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding passwordResetCompletedBinding(
+            Queue passwordResetCompletedQueue,
+            DirectExchange notificationExchange
+    ) {
+        return BindingBuilder
+                .bind(passwordResetCompletedQueue)
+                .to(notificationExchange)
+                .with(PASSWORD_RESET_COMPLETED_ROUTING_KEY);
     }
 
 
