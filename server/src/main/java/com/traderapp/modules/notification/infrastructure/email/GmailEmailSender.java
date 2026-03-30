@@ -49,7 +49,7 @@ public class GmailEmailSender implements EmailSender {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
         message.setTo(to);
-        message.setSubject("Welcome to Trader App");
+        message.setSubject("Bienvenue sur Trader App");
         String body = emailTemplateRenderer.render(
             "templates/emails/welcome-email.txt",
             Map.of(
@@ -59,4 +59,24 @@ public class GmailEmailSender implements EmailSender {
         message.setText(body);
         mailSender.send(message);
     }
+
+    @Override
+    public void sendPasswordResetEmail(String to, String firstName, String resetCode) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(from);
+        message.setTo(to);
+        message.setSubject("Votre code de reinitialisation");
+
+        String body = emailTemplateRenderer.render(
+                "templates/emails/password-reset-email.txt",
+                Map.of(
+                        "firstName", firstName,
+                        "resetCode", resetCode
+                )
+        );
+
+        message.setText(body);
+        mailSender.send(message);
+    }
+
 }
