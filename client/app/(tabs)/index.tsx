@@ -1,16 +1,18 @@
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
+import { Text } from '@/src/shared/ui/primitives/text';
+import { useAuthStore } from '@/src/features/auth/store/auth-store';
 
-import { SignUpForm } from '@/src/features/auth/ui/sign-up-form';
+export default function HomeScreen() {
+  const user = useAuthStore((state) => state.user);
 
-export default function SignUpScreen() {
   return (
-    <ScrollView
-      keyboardShouldPersistTaps="handled"
-      contentContainerClassName="flex-1 items-center justify-center p-4 py-8"
-      keyboardDismissMode="interactive">
-      <View className="w-full max-w-sm">
-        <SignUpForm />
-      </View>
-    </ScrollView>
+    <View className="flex-1 items-center justify-center px-6">
+      <Text className="text-center text-3xl font-bold">
+        Bonjour{user?.firstName ? `, ${user.firstName}` : ''}
+      </Text>
+      <Text className="text-muted-foreground mt-3 text-center text-base">
+        Bienvenue dans votre espace TraderApp.
+      </Text>
+    </View>
   );
 }

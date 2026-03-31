@@ -14,16 +14,62 @@ import { Separator } from '@/src/shared/ui/primitives/separator';
 import { Text } from '@/src/shared/ui/primitives/text';
 import * as React from 'react';
 import { Pressable, type TextInput, View } from 'react-native';
+import { useAuthStore } from '../store/auth-store';
+import axios from 'axios';
+import { login } from '../api/auth-api';
+import { ErrorAlert } from '@/src/shared/ui/feedback/error-alert';
  
 export function SignInForm() {
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const passwordInputRef = React.useRef<TextInput>(null);
  
   function onEmailSubmitEditing() {
     passwordInputRef.current?.focus();
   }
  
-  function onSubmit() {
-    // TODO: Submit form and navigate to protected screen if successful
+  async function onSubmit() {
+    if (isSubmitting) {
+      return;
+    }
+
+    setErrorMessage(null);
+    setIsSubmitting(true);
+
+    try {
+      const response = await login ({
+        email,
+        password
+      });
+      await useAuthStore.getState().setSession({
+        accessToken: response.accessToken,
+        user: {
+          userId: response.userId,
+          email: response.email,
+          firstName: response.firstName
+        }
+      });
+      router.replace('/(tabs)');
+    } catch(error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+
+          if (status === 401) {
+          setErrorMessage('Email ou mot de passe invalide');
+        } else if (status === 403) {
+          setErrorMessage('Veuillez verifier votre email avant de vous connecter');
+        } else {
+          setErrorMessage('Une erreur est survenue. Veuillez reessayer.');
+        }
+      } else {
+        setErrorMessage('Une erreur est survenue. Veuillez reessayer.');
+      }
+    } finally {
+        setIsSubmitting(false);
+      }
   }
  
   return (
@@ -41,6 +87,8 @@ export function SignInForm() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                value="email"
+                onChangeText={setEmail}
                 placeholder="m@example.com"
                 keyboardType="email-address"
                 autoComplete="email"
@@ -66,15 +114,22 @@ export function SignInForm() {
               <Input
                 ref={passwordInputRef}
                 id="password"
+                value="password"
+                onChangeText={setPassword}
                 secureTextEntry
                 returnKeyType="send"
                 onSubmitEditing={onSubmit}
               />
             </View>
-            <Button className="w-full" onPress={onSubmit}>
-              <Text>Continue</Text>
+            <Button className="w-full" onPress={onSubmit} disabled={isSubmitting}>
+              <Text>{isSubmitting? 'Connexion...' : 'Se connecter'}</Text>
             </Button>
           </View>
+          {errorMessage ? (
+              <ErrorAlert title="Email ou mot de passe invalide" />
+            ) : null
+          }
+
           <Text className="text-center text-sm">
             Pas encore de compte?{' '}
             <Pressable
