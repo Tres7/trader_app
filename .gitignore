@@ -19,6 +19,7 @@
 /client/yarn-debug.*
 /client/yarn-error.*
 /client/.vscode/
+/client/.env
 
 # server
 /server/.gradle/
