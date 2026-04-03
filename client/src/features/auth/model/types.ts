@@ -15,6 +15,15 @@ export interface RegisterPayload {
   country: string;
 }
 
+export interface VerifyEmailPayload {
+  email: string;
+  code: string
+}
+
+export interface ResendVerificationCodePayload {
+  email: string;
+}
+
 /**
  * BACKEND RESPONSES
  */
@@ -33,6 +42,18 @@ export interface RegisterApiResponse {
   emailVerified: boolean;
   message: string
 };
+
+export interface VerifyEmailApiResponse {
+  email: string;
+  emailVerified: boolean;
+  message: string;
+}
+
+
+export interface ResendVerificationCodeApiResponse {
+  email: string;
+  message: string;
+}
 
 
 /**

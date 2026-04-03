@@ -1,4 +1,5 @@
 import { Button } from '@/src/shared/ui/primitives/button';
+import { useCountdown } from '@/src/shared/hooks/use-countdown';
 import {
   Card,
   CardContent,
@@ -9,8 +10,12 @@ import {
 import { Input } from '@/src/shared/ui/primitives/input';
 import { Label } from '@/src/shared/ui/primitives/label';
 import { Text } from '@/src/shared/ui/primitives/text';
+import axios from 'axios';
 import * as React from 'react';
 import { type TextStyle, View } from 'react-native';
+import { resendVerificationCode, verifyEmail } from '../api/auth-api';
+import { router } from 'expo-router';
+import { ErrorAlert } from '@/src/shared/ui/feedback/error-alert';
  
 const RESEND_CODE_INTERVAL_SECONDS = 30;
  
@@ -22,10 +27,102 @@ type VerifyEmailFormProps = {
 
  
 export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
+  const [code, setCode] = React.useState('');
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = React.useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isResending, setIsResending] = React.useState(false);
+
   const { countdown, restartCountdown } = useCountdown(RESEND_CODE_INTERVAL_SECONDS);
  
-  function onSubmit() {
-    // TODO: Submit form and navigate to protected screen if successful
+  async function onSubmit() {
+    if (isSubmitting) {
+      return;
+    }
+
+    setErrorMessage(null);
+    setInfoMessage(null);
+
+    if (!email) {
+      setErrorMessage("Email manquant. Recommencez l'inscription.");
+      return;
+    }
+
+    if (!code.trim()) {
+      setErrorMessage('Veuillez entrer le code de verification.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      await verifyEmail({
+        email,
+        code: code.trim(),
+      });
+
+      router.replace('/sign-in');
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const message = error.response?.data?.message;
+
+        if (status === 409) {
+          setErrorMessage('Cet email est deja verifie. Vous pouvez vous connecter.');
+        } else if (status === 400) {
+          if (message === 'Verification code has expired') {
+            setErrorMessage('Le code de verification a expire.');
+          } else if (message === 'Verification code has already been used') {
+            setErrorMessage('Ce code de verification a deja ete utilise.');
+          } else {
+            setErrorMessage('Code de verification invalide.');
+          }
+        } else {
+          setErrorMessage('Une erreur est survenue. Veuillez reessayer.');
+        }
+      } else {
+        setErrorMessage('Une erreur est survenue. Veuillez reessayer.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function onResendCode() {
+    if (isResending || countdown > 0) {
+      return;
+    }
+
+    setErrorMessage(null);
+    setInfoMessage(null);
+
+    if (!email) {
+      setErrorMessage("Email manquant. Recommencez l'inscription.");
+      return;
+    }
+
+    setIsResending(true);
+
+    try {
+      const response = await resendVerificationCode({ email });
+
+      setInfoMessage(response.message || 'Code renvoye avec succes.');
+      restartCountdown();
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+
+        if (status === 409) {
+          setErrorMessage('Cet email est deja verifie. Vous pouvez vous connecter.');
+        } else {
+          setErrorMessage('Impossible de renvoyer le code pour le moment.');
+        }
+      } else {
+        setErrorMessage('Impossible de renvoyer le code pour le moment.');
+      }
+    } finally {
+      setIsResending(false);
+    }
   }
  
   return (
@@ -34,7 +131,7 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
         <CardHeader>
           <CardTitle className="text-center text-xl sm:text-left">Vérifier votre email</CardTitle>
           <CardDescription className="text-center sm:text-left">
-            Entrer le code de vérification envoyé au vraiMailBienDispo@example.com
+            Entrer le code de vérification envoyé à {email}
           </CardDescription>
         </CardHeader>
         <CardContent className="gap-6">
@@ -44,6 +141,8 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
               <Input
                 id="code"
                 autoCapitalize="none"
+                value={code}
+                onChangeText={setCode}
                 returnKeyType="send"
                 keyboardType="numeric"
                 autoComplete="sms-otp"
@@ -53,13 +152,10 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
               <Button
                 variant="link"
                 size="sm"
-                disabled={countdown > 0}
-                onPress={() => {
-                  // TODO: Resend code
-                  restartCountdown();
-                }}>
+                disabled={countdown > 0 || isResending}
+                onPress={onResendCode}>
                 <Text className="text-center text-xs">
-                  Rien reçu? Demander un renvoi{' '}
+                  {isResending ? 'Renvoi...' : 'Rien recu? Demander un renvoi'}{' '}
                   {countdown > 0 ? (
                     <Text className="text-xs" style={TABULAR_NUMBERS_STYLE}>
                       ({countdown})
@@ -68,15 +164,19 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
                 </Text>
               </Button>
             </View>
+            {errorMessage ? <ErrorAlert title={errorMessage} /> : null}
+            {infoMessage ? (
+              <Text className="text-center text-sm text-muted-foreground">{infoMessage}</Text>
+            ) : null}
             <View className="gap-3">
-              <Button className="w-full" onPress={onSubmit}>
-                <Text>Continue</Text>
+              <Button className="w-full" onPress={onSubmit} disabled={isSubmitting}>
+                <Text>{isSubmitting ? 'Verification...' : 'Continue'}</Text>
               </Button>
               <Button
                 variant="link"
                 className="mx-auto"
                 onPress={() => {
-                  // TODO: Navigate to sign up screen
+                  router.replace('/sign-up')
                 }}>
                 <Text>Annuler</Text>
               </Button>
@@ -86,42 +186,4 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
       </Card>
     </View>
   );
-}
- 
-function useCountdown(seconds = 30) {
-  const [countdown, setCountdown] = React.useState(seconds);
-  const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
- 
-  const startCountdown = React.useCallback(() => {
-    setCountdown(seconds);
- 
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
- 
-    intervalRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-  }, [seconds]);
- 
-  React.useEffect(() => {
-    startCountdown();
- 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [startCountdown]);
- 
-  return { countdown, restartCountdown: startCountdown };
 }
