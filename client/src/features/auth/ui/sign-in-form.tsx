@@ -1,6 +1,7 @@
 import { SocialConnections } from '@/src/features/auth/ui/social-connections';
 import { Button } from '@/src/shared/ui/primitives/button';
 import { router } from 'expo-router';
+import { Eye, EyeOff } from 'lucide-react-native';
 import {
   Card,
   CardContent,
@@ -24,6 +25,8 @@ export function SignInForm() {
   const [password, setPassword] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
+
 
   const passwordInputRef = React.useRef<TextInput>(null);
  
@@ -116,10 +119,20 @@ export function SignInForm() {
                 id="password"
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry
+                secureTextEntry = {isPasswordVisible}
                 returnKeyType="send"
                 onSubmitEditing={onSubmit}
               />
+                <Pressable
+                  className="absolute right-3 top-7 bottom-0 justify-center"
+                  onPress={() => setIsPasswordVisible((prev) => !prev)}
+                  hitSlop={8}>
+                  {isPasswordVisible ? (
+                    <EyeOff size={18} color="#71717a" />
+                  ) : (
+                    <Eye size={18} color="#71717a" />
+                  )}
+                </Pressable>
             </View>
             <Button className="w-full" onPress={onSubmit} disabled={isSubmitting}>
               <Text>{isSubmitting? 'Connexion...' : 'Se connecter'}</Text>

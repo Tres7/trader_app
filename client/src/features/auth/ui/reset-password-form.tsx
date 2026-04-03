@@ -113,7 +113,7 @@ export function ResetPasswordForm({ email }: ResetPasswordFormProps) {
               </View>
               <Input
                 id="password"
-                secureTextEntry={!isPasswordVisible}
+                secureTextEntry={isPasswordVisible}
                 value= {password}
                 onChangeText={setPassword}
                 returnKeyType="next"
