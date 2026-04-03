@@ -24,6 +24,16 @@ export interface ResendVerificationCodePayload {
   email: string;
 }
 
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
 /**
  * BACKEND RESPONSES
  */
@@ -51,6 +61,17 @@ export interface VerifyEmailApiResponse {
 
 
 export interface ResendVerificationCodeApiResponse {
+  email: string;
+  message: string;
+}
+
+
+export interface ForgotPasswordApiResponse {
+  email: string;
+  message: string;
+}
+
+export interface ResetPasswordApiResponse {
   email: string;
   message: string;
 }
