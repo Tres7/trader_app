@@ -15,6 +15,10 @@ import { Separator } from '@/src/shared/ui/primitives/separator';
 import { Text } from '@/src/shared/ui/primitives/text';
 import * as React from 'react';
 import { Platform, Pressable, TextInput, View } from 'react-native';
+import axios from 'axios';
+import { formatDateForApi, formatDateForDisplay } from '@/src/shared/lib/date';
+import { register } from '../api/auth-api';
+import { ErrorAlert } from '@/src/shared/ui/feedback/error-alert';
 
 export function SignUpForm() {
   const passwordInputRef = React.useRef<TextInput>(null);
@@ -22,6 +26,15 @@ export function SignUpForm() {
   const lastNameInputRef = React.useRef<TextInput>(null);
   const birthDateInputRef = React.useRef<TextInput>(null);
   const countryInputRef = React.useRef<TextInput>(null);
+
+  const [firstName, setFirstName] = React.useState('');
+  const [lastName, setLastName] = React.useState('');
+  const [email, setEmail] = React.useState('');
+  const [country, setCountry] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
 
   const [birthDate, setBirthDate] = React.useState<Date | undefined>(undefined);
   const [showDatePicker, setShowDatePicker] = React.useState(false);
@@ -67,14 +80,49 @@ export function SignUpForm() {
   }
 
 
-  function onSubmit() {
+  async function onSubmit() {
+    if (isSubmitting) {
+      return;
+    }
+
+    setErrorMessage(null);
+    setIsSubmitting(true);
+
+    try {
+      const response = await register({
+        firstName,
+        lastName,
+        birthDate: formatDateForApi(birthDate),
+        email,
+        password,
+        country,
+      });
+
       router.push({
         pathname: '/verify-email',
         params: {
-          email: 'm@example.com',
-      },
-    });
+          email: response.email ?? email,
+        },
+      });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+
+        if (status === 409) {
+          setErrorMessage('Un compte existe deja avec cet email');
+        } else if (status === 400) {
+          setErrorMessage('Veuillez verifier les informations du formulaire');
+        } else {
+          setErrorMessage('Une erreur est survenue. Veuillez reessayer.');
+        }
+      } else {
+        setErrorMessage('Une erreur est survenue. Veuillez reessayer.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   }
+
 
   return (
     <View className="gap-6">
@@ -92,6 +140,8 @@ export function SignUpForm() {
               <Input
                 ref={firstNameInputRef}
                 id="firstName"
+                value= {firstName}
+                onChangeText={setFirstName}
                 placeholder="Amah"
                 autoCapitalize="words"
                 onSubmitEditing={onFirstNameSubmitEditing}
@@ -103,6 +153,8 @@ export function SignUpForm() {
               <Input
                 ref={lastNameInputRef}
                 id="lastName"
+                value= {lastName}
+                onChangeText={setLastName}
                 placeholder="KWACTCHAH"
                 autoCapitalize="words"
                 onSubmitEditing={onLastNameSubmitEditing}
@@ -115,7 +167,7 @@ export function SignUpForm() {
                 <Input
                   id="birthDate"
                   placeholder="JJ/MM/AAAA"
-                  value={formatBirthDate(birthDate)}
+                  value={formatDateForDisplay(birthDate)}
                   editable={false}
                   pointerEvents="none"
                 />
@@ -138,6 +190,8 @@ export function SignUpForm() {
                 placeholder="m@example.com"
                 keyboardType="email-address"
                 autoComplete="email"
+                value= {email}
+                onChangeText={setEmail}
                 autoCapitalize="none"
                 onSubmitEditing={onEmailSubmitEditing}
                 returnKeyType="next"
@@ -149,8 +203,10 @@ export function SignUpForm() {
               <Input
                 ref={countryInputRef}
                 id="country"
-                placeholder="Togo"
-                autoCapitalize="words"
+                value={country}
+                onChangeText={setCountry}
+                placeholder="TG"
+                autoCapitalize="characters"
                 onSubmitEditing={onCountrySubmitEditing}
                 returnKeyType="next"
               />
@@ -162,13 +218,16 @@ export function SignUpForm() {
               <Input
                 ref={passwordInputRef}
                 id="password"
+                value={password}
+                onChangeText={setPassword}
                 secureTextEntry
                 returnKeyType="send"
                 onSubmitEditing={onSubmit}
               />
             </View>
-            <Button className="w-full" onPress={onSubmit}>
-              <Text>Continue</Text>
+            {errorMessage ? <ErrorAlert title={errorMessage} /> : null}
+            <Button className="w-full" onPress={onSubmit} disabled={isSubmitting}>
+              <Text>{isSubmitting ? 'Creation...' : 'Continue'}</Text>
             </Button>
           </View>
           <View className="flex-row items-center justify-center gap-1">

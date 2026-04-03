@@ -44,7 +44,6 @@ export function SignInForm() {
         email,
         password
       });
-      console.log('LOGIN OK', response);
       await useAuthStore.getState().setSession({
         accessToken: response.accessToken,
         user: {
@@ -53,10 +52,8 @@ export function SignInForm() {
           firstName: response.firstName
         }
       });
-      console.log('SESSION OK');
       router.replace('/(tabs)');
     } catch(error) {
-      console.error('LOGIN FLOW ERROR', error);
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
 
