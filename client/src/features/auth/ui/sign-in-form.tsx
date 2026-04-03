@@ -44,6 +44,7 @@ export function SignInForm() {
         email,
         password
       });
+      console.log('LOGIN OK', response);
       await useAuthStore.getState().setSession({
         accessToken: response.accessToken,
         user: {
@@ -52,12 +53,14 @@ export function SignInForm() {
           firstName: response.firstName
         }
       });
+      console.log('SESSION OK');
       router.replace('/(tabs)');
     } catch(error) {
+      console.error('LOGIN FLOW ERROR', error);
       if (axios.isAxiosError(error)) {
         const status = error.response?.status;
 
-          if (status === 401) {
+        if (status === 401) {
           setErrorMessage('Email ou mot de passe invalide');
         } else if (status === 403) {
           setErrorMessage('Veuillez verifier votre email avant de vous connecter');
@@ -87,7 +90,7 @@ export function SignInForm() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                value="email"
+                value={email}
                 onChangeText={setEmail}
                 placeholder="m@example.com"
                 keyboardType="email-address"
@@ -114,7 +117,7 @@ export function SignInForm() {
               <Input
                 ref={passwordInputRef}
                 id="password"
-                value="password"
+                value={password}
                 onChangeText={setPassword}
                 secureTextEntry
                 returnKeyType="send"
@@ -125,10 +128,7 @@ export function SignInForm() {
               <Text>{isSubmitting? 'Connexion...' : 'Se connecter'}</Text>
             </Button>
           </View>
-          {errorMessage ? (
-              <ErrorAlert title="Email ou mot de passe invalide" />
-            ) : null
-          }
+          {errorMessage ? <ErrorAlert title={errorMessage} /> : null}
 
           <Text className="text-center text-sm">
             Pas encore de compte?{' '}
