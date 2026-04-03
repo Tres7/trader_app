@@ -170,6 +170,7 @@ export function SignUpForm() {
                   value={formatDateForDisplay(birthDate)}
                   editable={false}
                   pointerEvents="none"
+                  className="opacity-100"
                 />
               </Pressable>
 
