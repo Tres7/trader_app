@@ -76,6 +76,17 @@ export interface ResetPasswordApiResponse {
   message: string;
 }
 
+export interface GetCurrentUserApiResponse {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  country: string;
+  birthDate: string;
+  emailVerified: boolean;
+}
+
+
 
 /**
  * SESSION

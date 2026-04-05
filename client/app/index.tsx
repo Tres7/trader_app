@@ -9,8 +9,18 @@ import {
 } from '@/src/shared/ui/primitives/card';
 import { Button } from '@/src/shared/ui/primitives/button';
 import { Text } from '@/src/shared/ui/primitives/text';
+import { useAuthStore } from '@/src/features/auth/store/auth-store';
+import React from 'react';
 
 export default function PublicHomeScreen() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      router.replace('/(tabs)');
+    }
+  }, [isAuthenticated]);
+
   return (
     <ScrollView
       contentContainerClassName="flex-1 items-center justify-center p-4 py-8 sm:p-6"

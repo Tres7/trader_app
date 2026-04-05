@@ -1,5 +1,5 @@
 import { httpClient } from "@/src/shared/api/http-client";
-import { ForgotPasswordApiResponse, ForgotPasswordPayload, LoginApiResponse, LoginPayload, RegisterApiResponse, RegisterPayload, ResendVerificationCodeApiResponse, ResendVerificationCodePayload, ResetPasswordApiResponse, ResetPasswordPayload, VerifyEmailApiResponse, VerifyEmailPayload } from "../model/types";
+import { ForgotPasswordApiResponse, GetCurrentUserApiResponse, ForgotPasswordPayload, LoginApiResponse, LoginPayload, RegisterApiResponse, RegisterPayload, ResendVerificationCodeApiResponse, ResendVerificationCodePayload, ResetPasswordApiResponse, ResetPasswordPayload, VerifyEmailApiResponse, VerifyEmailPayload } from "../model/types";
 
 export async function login(payload: LoginPayload): Promise<LoginApiResponse> {
   const response = await httpClient.post<LoginApiResponse>('/api/v1/auth/login', payload);
@@ -43,5 +43,10 @@ export async function resetPassword(
     '/api/v1/auth/reset-password',
     payload
   );
+  return response.data;
+}
+
+export async function getCurrentUser(): Promise<GetCurrentUserApiResponse> {
+  const response = await httpClient.get<GetCurrentUserApiResponse>('/api/v1/auth/me');
   return response.data;
 }

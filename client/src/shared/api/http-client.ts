@@ -1,3 +1,4 @@
+import { getAccessToken } from '@/src/features/auth/store/auth-storage';
 import axios from 'axios'
 
 const baseURL = process.env.EXPO_PUBLIC_API_BASE_URL;
@@ -14,7 +15,12 @@ export const httpClient = axios.create({
     }
 });
 
-httpClient.interceptors.request.use((config) => {
-    // TODO: Token injection will be add here
-    return config;
-})
+httpClient.interceptors.request.use(async (config) => {
+  const token = await getAccessToken();
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
