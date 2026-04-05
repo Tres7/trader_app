@@ -36,7 +36,6 @@ export const useAuthStore = create<AuthState>((set) => ({
           accessToken: null,
           user: null,
           isAuthenticated: false,
-          isHydrating: false,
         });
         return;
       }
@@ -51,7 +50,6 @@ export const useAuthStore = create<AuthState>((set) => ({
           firstName: currentUser.firstName,
         },
         isAuthenticated: true,
-        isHydrating: false,
       });
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -68,8 +66,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         accessToken: null,
         user: null,
         isAuthenticated: false,
-        isHydrating: false,
       });
+    } finally {
+      set({ isHydrating: false });
     }
   },
 

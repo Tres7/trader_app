@@ -6,24 +6,38 @@ import { StatusBar } from 'expo-status-bar';
 import { PortalHost } from '@rn-primitives/portal';
 import 'react-native-reanimated';
 import * as React from 'react';
+import { Text } from '@/src/shared/ui/primitives/text';
 
 import { NAV_THEME } from '@/src/shared/lib/theme';
 import { useAuthStore } from '@/src/features/auth/store/auth-store';
+import { View } from 'react-native';
 
 export const unstable_settings = {
 };
 
+let hasBootstrappedSession = false;
 export default function RootLayout() {
-  const hydrateSession = useAuthStore((state) => state.hydrateSession);
+  const isHydrating = useAuthStore((state) => state.isHydrating);
 
-    const isHydrating = useAuthStore((state) => state.isHydrating);
+    React.useEffect(() => {
+      if (hasBootstrappedSession) {
+        return;
+      }
+      hasBootstrappedSession = true;
+      useAuthStore.getState().hydrateSession();
+    }, []);
 
-  React.useEffect(() => {
-    hydrateSession();
-  }, [hydrateSession]);
-
-  if (isHydrating) {
-    return null;
+    if (isHydrating) {
+    return (
+      <ThemeProvider value={NAV_THEME.dark}>
+        <View className="flex-1 items-center justify-center bg-background px-6">
+          <Text className="text-center text-base text-muted-foreground">
+            Chargement de la session...
+          </Text>
+        </View>
+        <StatusBar style="dark" />
+      </ThemeProvider>
+    );
   }
 
   return (
