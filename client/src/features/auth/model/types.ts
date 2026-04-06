@@ -41,6 +41,11 @@ export interface UpdateCurrentUserProfilePayload {
   country: string;
 }
 
+export interface UpdateCurrentUserPasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
 /**
  * BACKEND RESPONSES
  */
@@ -93,6 +98,9 @@ export interface GetCurrentUserApiResponse {
   emailVerified: boolean;
 }
 
+export interface UpdateCurrentUserPasswordApiResponse {
+  message: string;
+}
 
 
 /**

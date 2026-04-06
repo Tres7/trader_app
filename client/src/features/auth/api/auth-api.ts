@@ -1,5 +1,5 @@
 import { httpClient } from "@/src/shared/api/http-client";
-import { ForgotPasswordApiResponse, GetCurrentUserApiResponse, ForgotPasswordPayload, LoginApiResponse, LoginPayload, RegisterApiResponse, RegisterPayload, ResendVerificationCodeApiResponse, ResendVerificationCodePayload, ResetPasswordApiResponse, ResetPasswordPayload, VerifyEmailApiResponse, VerifyEmailPayload, UpdateCurrentUserProfilePayload } from "../model/types";
+import { ForgotPasswordApiResponse, GetCurrentUserApiResponse, ForgotPasswordPayload, LoginApiResponse, LoginPayload, RegisterApiResponse, RegisterPayload, ResendVerificationCodeApiResponse, ResendVerificationCodePayload, ResetPasswordApiResponse, ResetPasswordPayload, VerifyEmailApiResponse, VerifyEmailPayload, UpdateCurrentUserProfilePayload, UpdateCurrentUserPasswordPayload, UpdateCurrentUserPasswordApiResponse } from "../model/types";
 
 export async function login(payload: LoginPayload): Promise<LoginApiResponse> {
   const response = await httpClient.post<LoginApiResponse>('/api/v1/auth/login', payload);
@@ -55,5 +55,15 @@ export async function updateCurrentUserProfile(
   payload: UpdateCurrentUserProfilePayload
 ): Promise<GetCurrentUserApiResponse> {
   const response = await httpClient.patch<GetCurrentUserApiResponse>('/api/v1/auth/me', payload);
+  return response.data;
+}
+
+export async function updateCurrentUserPassword(
+  payload: UpdateCurrentUserPasswordPayload
+): Promise<UpdateCurrentUserPasswordApiResponse> {
+  const response = await httpClient.patch<UpdateCurrentUserPasswordApiResponse>(
+    '/api/v1/auth/me/password',
+    payload
+  );
   return response.data;
 }

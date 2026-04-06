@@ -46,6 +46,8 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="profile/information" options={{ title: 'Informations personnelles' }}/>
+        <Stack.Screen name="profile/security" options={{ title: 'Sécurité' }}/>
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <PortalHost />
