@@ -25,6 +25,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
+  refreshUser: (user) => {
+    set((state) => ({
+      ...state,
+      user,
+    }));
+  },
+
+
   hydrateSession: async () => {
     set({ isHydrating: true });
 

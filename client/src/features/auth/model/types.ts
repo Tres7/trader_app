@@ -34,6 +34,13 @@ export interface ResetPasswordPayload {
   newPassword: string;
 }
 
+export interface UpdateCurrentUserProfilePayload {
+  firstName: string;
+  lastName: string;
+  birthDate: string;
+  country: string;
+}
+
 /**
  * BACKEND RESPONSES
  */
@@ -110,4 +117,5 @@ export interface AuthState {
   setSession: (session: AuthSession) => Promise<void>;
   hydrateSession: () => Promise<void>;
   logout: () => Promise<void>;
+  refreshUser: (user: AuthUser) => void;
 }
