@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: trader-app
+
+  profiles:
+    active: dev
+
+server:
+  port: 8080

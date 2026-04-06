@@ -1,0 +1,56 @@
+services:
+  db:
+    image: postgres:16-bookworm
+    container_name: traderapp-db
+    env_file:
+      - server/.env
+    ports:
+      - "5433:5432"
+    volumes:
+      - traderapp_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    env_file:
+      - server/.env
+    ports:
+      - "5051:80"
+    depends_on:
+      db:
+        condition: service_healthy
+  
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: traderapp_server
+    ports:
+      - "8080:8080"
+    env_file:
+      - server/.env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    env_file:
+      - server/.env
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+volumes:
+  traderapp_db:
+  rabbitmq_data:

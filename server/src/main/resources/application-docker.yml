@@ -1,0 +1,32 @@
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db:5432/traderapp}
+    username: ${SPRING_DATASOURCE_USERNAME:traderapp}
+    password: ${SPRING_DATASOURCE_PASSWORD:traderapp_dev_password}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  flyway:
+    enabled: true
+
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:rabbitmq}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:traderapp}
+    password: ${SPRING_RABBITMQ_PASSWORD:traderapp_rabbit_password}
+
+server:
+  port: ${SERVER_PORT:8080}
