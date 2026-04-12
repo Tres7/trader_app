@@ -1,7 +1,6 @@
 package com.traderapp.modules.notification.infrastructure.messaging;
 
 import com.traderapp.modules.auth.application.events.PasswordResetRequestedEvent;
-import com.traderapp.modules.auth.infrastructure.messaging.RabbitMqConfig;
 import com.traderapp.modules.notification.application.ports.output.EmailSender;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,7 @@ public class PasswordResetRequestedEventListener {
         this.emailSender = emailSender;
     }
 
-    @RabbitListener(queues = RabbitMqConfig.PASSWORD_RESET_QUEUE)
+    @RabbitListener(queues = RabbitMqNotificationConfig.PASSWORD_RESET_QUEUE)
     public void handle(PasswordResetRequestedEvent event) {
         emailSender.sendPasswordResetEmail(
                 event.email(),
