@@ -9,5 +9,5 @@ import com.traderapp.modules.plan.domain.valueObjects.TradingPlanId;
 public interface TradingPlanRepository {
     Optional<TradingPlan> findByUserId(UUID userId);
     Optional<TradingPlan> findById(TradingPlanId id);
-    TradingPlanRepository save (TradingPlan plan);
+    TradingPlan save (TradingPlan plan);
 }
