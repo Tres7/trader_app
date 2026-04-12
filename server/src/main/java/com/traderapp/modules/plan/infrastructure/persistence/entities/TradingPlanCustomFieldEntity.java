@@ -12,7 +12,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "trading_culstom_field")
+@Table(name = "trading_plan_custom_field")
 public class TradingPlanCustomFieldEntity {
     @Id
     private UUID id;
