@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.traderapp.modules.notification.application.usecases.SendInAppNotification;
 import com.traderapp.modules.plan.application.events.TradingPlanCreatedEvent;
-import com.traderapp.modules.plan.infrastructure.messaging.RabbitMqPlanConfig;
 
 @Component
 public class TradingPlanCreatedEventListener {
@@ -22,7 +21,7 @@ public class TradingPlanCreatedEventListener {
         this.sendInAppNotification = sendInAppNotification;
     }
 
-    @RabbitListener(queues = RabbitMqPlanConfig.PLAN_CREATED_NOTIFICATION_QUEUE)
+    @RabbitListener(queues = RabbitMqNotificationConfig.TRADING_PLAN_CREATED_QUEUE)
     public void handle(TradingPlanCreatedEvent event) {
         log.info("TradingPlanCreatedEvent received for userId: {}", event.userId());
         sendInAppNotification.execute(
