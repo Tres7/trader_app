@@ -6,6 +6,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.traderapp.modules.plan.application.commands.UpdateTradingPlanCommand;
+import com.traderapp.modules.plan.application.events.TradingPlanUpdatedEvent;
+import com.traderapp.modules.plan.application.ports.output.PlanEventPublisher;
 import com.traderapp.modules.plan.domain.entities.TradingPlan;
 import com.traderapp.modules.plan.domain.repositories.TradingPlanRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,8 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class UpdateTradingPlan {
     private final TradingPlanRepository tradingPlanRepository;
 
-    public UpdateTradingPlan(TradingPlanRepository tradingPlanRepository) {
+    private final PlanEventPublisher planEventPublisher;
+
+    public UpdateTradingPlan(TradingPlanRepository tradingPlanRepository, PlanEventPublisher planEventPublisher) {
         this.tradingPlanRepository = tradingPlanRepository;
+        this.planEventPublisher = planEventPublisher;
     }
     
     @Transactional
@@ -34,6 +39,15 @@ public class UpdateTradingPlan {
 
         command.customFields().forEach(f -> plan.addCustomField(f.fieldName(), f.fieldValue(), f.displayOrder()));
 
-        return tradingPlanRepository.save(plan); 
+        TradingPlan saved = tradingPlanRepository.save(plan);
+        
+        planEventPublisher.publishTradingPlanUpdated(
+            new TradingPlanUpdatedEvent(
+                saved.getId().toString(),
+                saved.getUserId().toString()
+            )
+        );
+
+        return saved; 
     }
 }

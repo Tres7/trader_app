@@ -16,6 +16,7 @@ public class RabbitMqPlanConfig {
     public static final String PLAN_EXCHANGE = "plan.exchange";
     public static final String PLAN_USER_EMAIL_VERIFIED_QUEUE = "plan.user-email-verified.queue";
     public static final String PLAN_CREATED_ROUTING_KEY = "plan.trading-plan.created";
+    public static final String PLAN_UPDATED_ROUTING_KEY = "plan.trading-plan.updated";
 
     @Bean("planExchange")
     public DirectExchange planExchange() {
