@@ -1,6 +1,9 @@
 package com.traderapp.modules.plan.infrastructure.http.controllers;
 
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import java.util.UUID;
+import org.springframework.http.MediaType;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.traderapp.modules.auth.application.dto.AuthenticatedUser;
 import com.traderapp.modules.plan.application.commands.UpdateTradingPlanCommand;
+import com.traderapp.modules.plan.application.usecases.ExportTradingPlanAsPdf;
 import com.traderapp.modules.plan.application.usecases.GetTradingPlan;
 import com.traderapp.modules.plan.application.usecases.UpdateTradingPlan;
 import com.traderapp.modules.plan.infrastructure.http.responses.TradingPlanResponse;
@@ -22,10 +26,12 @@ import com.traderapp.modules.plan.presentation.rest.requests.UpdateTradingPlanRe
 public class TradingPlanController {
     private final GetTradingPlan getTradingPlan;
     private final UpdateTradingPlan updateTradingPlan;
+    private final ExportTradingPlanAsPdf exportTradingPlanAsPdf;
 
-    public TradingPlanController(GetTradingPlan getTradingPlan, UpdateTradingPlan updateTradingPlan) {
+    public TradingPlanController(GetTradingPlan getTradingPlan, UpdateTradingPlan updateTradingPlan, ExportTradingPlanAsPdf exportTradingPlanAsPdf) {
         this.getTradingPlan = getTradingPlan;
         this.updateTradingPlan = updateTradingPlan;
+        this.exportTradingPlanAsPdf = exportTradingPlanAsPdf;
     }
 
     @GetMapping
@@ -56,4 +62,17 @@ public class TradingPlanController {
         TradingPlanResponse response = TradingPlanResponse.from(updateTradingPlan.execute(userId, command));
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/export/pdf")
+    public ResponseEntity<byte[]> exportPdf(@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+        UUID userId = UUID.fromString(authenticatedUser.userId());
+        byte[] pdf = exportTradingPlanAsPdf.execute(userId);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDisposition(ContentDisposition.attachment().filename("trading-plan.pdf").build());
+
+        return ResponseEntity.ok().headers(headers).body(pdf);
+    }
+
 }
