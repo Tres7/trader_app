@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.traderapp.modules.auth.application.dto.AuthenticatedUser;
@@ -63,16 +64,23 @@ public class TradingPlanController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/export/pdf")
-    public ResponseEntity<byte[]> exportPdf(@AuthenticationPrincipal AuthenticatedUser authenticatedUser) {
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> export(
+        @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+        @RequestParam String format
+    ) {
         UUID userId = UUID.fromString(authenticatedUser.userId());
-        byte[] pdf = exportTradingPlanAsPdf.execute(userId);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDisposition(ContentDisposition.attachment().filename("trading-plan.pdf").build());
-
-        return ResponseEntity.ok().headers(headers).body(pdf);
+        return switch (format.toUpperCase()) {
+            case "PDF" -> {
+                byte[] pdf = exportTradingPlanAsPdf.execute(userId);
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_PDF);
+                headers.setContentDisposition(ContentDisposition.attachment().filename("trading-plan.pdf").build());
+                yield ResponseEntity.ok().headers(headers).body(pdf);
+            }
+            default -> ResponseEntity.badRequest().build();
+        };
     }
 
 }
