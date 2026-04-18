@@ -20,6 +20,7 @@ public class RabbitMqNotificationConfig {
     public static final String PASSWORD_RESET_COMPLETED_QUEUE = "notification.password-reset-completed.queue";
     public static final String TRADING_PLAN_CREATED_QUEUE = "notification.trading-plan-created.queue";
     public static final String TRADING_PLAN_UPDATED_QUEUE = "notification.trading-plan-updated.queue";
+    public static final String TRADING_PLAN_EXPORTED_QUEUE = "notification.trading-plan-exported.queue";
 
     @Bean
     public Queue verificationEmailQueue() {
@@ -49,6 +50,11 @@ public class RabbitMqNotificationConfig {
     @Bean
     public Queue tradingPlanUpdatedQueue() {
         return new Queue(TRADING_PLAN_UPDATED_QUEUE);
+    }
+
+    @Bean
+    public Queue tradingPlanExportedQueue() {
+        return new Queue(TRADING_PLAN_EXPORTED_QUEUE);
     }
 
     @Bean
@@ -109,5 +115,15 @@ public class RabbitMqNotificationConfig {
         return BindingBuilder.bind(tradingPlanUpdatedQueue)
             .to(planExchange)
             .with(RabbitMqPlanConfig.PLAN_UPDATED_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding tradingPlanExportedBinding(
+        Queue tradingPlanExportedQueue,
+        @Qualifier("planExchange") DirectExchange planExchange
+    ) {
+        return BindingBuilder.bind(tradingPlanExportedQueue)
+            .to(planExchange)
+            .with(RabbitMqPlanConfig.PLAN_EXPORTED_ROUTING_KEY);
     }
 }
