@@ -52,6 +52,9 @@ export function usePlanScreen() {
         if (editing.type === 'section') {
         setDrafts((prev) => ({ ...prev, [editing.key]: editingValue }));
         } else {
+        if (!editingFieldName.trim()) {
+            return;
+        }
         setCustomFields((prev) =>
             prev.map((f) =>
             f.id === editing.id ? { ...f, fieldName: editingFieldName, fieldValue: editingValue } : f
@@ -60,7 +63,7 @@ export function usePlanScreen() {
         }
         setEditing(null);
     }
-
+    
     function openCommentEdit(key: string, label: string) {
         setCommentEditing({ key, label });
         setCommentValue(sectionComments[key] ?? '');
@@ -100,12 +103,16 @@ export function usePlanScreen() {
 
     function handleSave() {
         savePlan({
-        sections: ALL_SECTIONS.map((key) => ({ key, content: drafts[key] ?? '' })),
-        customFields: customFields.map((f, i) => ({
-            fieldName: f.fieldName,
-            fieldValue: f.fieldValue ?? '',
-            displayOrder: i + 1,
-        })),
+            sections: ALL_SECTIONS.map((key) => ({ 
+                key, 
+                content: drafts[key] ?? '' ,
+                comment: sectionComments[key] ?? '',
+            })),
+            customFields: customFields.map((f, i) => ({
+                fieldName: f.fieldName,
+                fieldValue: f.fieldValue ?? '',
+                displayOrder: i + 1,
+            })),
         });
     }
 

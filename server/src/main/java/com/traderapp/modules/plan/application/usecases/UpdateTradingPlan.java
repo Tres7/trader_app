@@ -30,6 +30,12 @@ public class UpdateTradingPlan {
 
         command.sections().forEach(s -> plan.updateSection(s.key(), s.content()));
 
+        command.sections().forEach(s -> {
+            if (s.comment() != null) {
+                plan.updateSectionComment(s.key(), s.comment());
+            }
+        });
+
         // get des existing customfields, delete them and save 
         List<UUID> existingIds = plan.getCustomFields().stream()
                     .map(f -> f.getId())

@@ -8,6 +8,6 @@ public record UpdateTradingPlanRequest(
         List<SectionRequest> sections,
         List<CustomFieldRequest> customFields
 ) {
-    public record SectionRequest(SectionKey key, String content) {}
+    public record SectionRequest(SectionKey key, String content, String comment) {}
     public record CustomFieldRequest(String fieldName, String fieldValue, int displayOrder) {}
 }

@@ -36,6 +36,7 @@ export const SECTION_LABELS: Record<SectionKey, string> = {
 export interface SectionPayload {
   key: SectionKey;
   content: string;
+  comment?: string
 }
 
 export interface CustomFieldPayload {

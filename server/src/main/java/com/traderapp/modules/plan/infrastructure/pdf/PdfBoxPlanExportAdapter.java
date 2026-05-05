@@ -46,9 +46,6 @@ public class PdfBoxPlanExportAdapter implements PlanExportPort {
                 writer.addHeading("Champs standards");
                 for (TradingPlanSection section : filledSections) {
                     writer.addField(section.getSectionKey().getLabel(), section.getContent());
-                    if (section.getComment() != null && !section.getComment().isBlank()) {
-                        writer.addComment(section.getComment());
-                    }
                 }
             }
 
@@ -57,9 +54,6 @@ public class PdfBoxPlanExportAdapter implements PlanExportPort {
                 writer.addHeading("Champs personnalisés");
                 for (TradingPlanCustomField field : filledFields) {
                     writer.addField(field.getFieldName(), field.getFieldValue());
-                    if (field.getComment() != null && !field.getComment().isBlank()) {
-                        writer.addComment(field.getComment());
-                    }
                 }
             }
 
@@ -126,19 +120,6 @@ public class PdfBoxPlanExportAdapter implements PlanExportPort {
             for (String line : lines) {
                 stream.beginText();
                 stream.newLineAtOffset(MARGIN + 15f, y);
-                stream.showText(sanitize(line));
-                stream.endText();
-                y -= LINE_HEIGHT;
-            }
-        }
-
-        void addComment(String comment) throws IOException {
-            String[] lines = wrap("  → " + comment, 90);
-            checkSpace(LINE_HEIGHT * lines.length);
-            stream.setFont(fontOblique, CONTENT_SIZE - 1);
-            for (String line : lines) {
-                stream.beginText();
-                stream.newLineAtOffset(MARGIN + 10f, y);
                 stream.showText(sanitize(line));
                 stream.endText();
                 y -= LINE_HEIGHT;

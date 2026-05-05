@@ -8,6 +8,6 @@ public record UpdateTradingPlanCommand(
     List<SectionCommand> sections,
     List<CustomFieldCommand> customFields
 ) {
-    public record SectionCommand(SectionKey key, String content) {}
+    public record SectionCommand(SectionKey key, String content, String comment) {}
     public record CustomFieldCommand(String fieldName, String fieldValue, int displayOrder) {}
 }
