@@ -2,6 +2,7 @@ package com.traderapp.modules.plan.infrastructure.pdf;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -33,24 +34,29 @@ public class PdfBoxPlanExportAdapter implements PlanExportPort {
             writer.addTitle("Mon Plan de Trading");
             writer.addSeparator();
 
-            if (!plan.getSections().isEmpty()) {
+            List<TradingPlanSection> filledSections = plan.getSections().stream()
+                .filter(s -> s.getContent() != null && !s.getContent().isBlank())
+                .collect(java.util.stream.Collectors.toList());
+
+            List<TradingPlanCustomField> filledFields = plan.getCustomFields().stream()
+                .filter(f -> f.getFieldValue() != null && !f.getFieldValue().isBlank())
+                .collect(java.util.stream.Collectors.toList());
+
+            if (!filledSections.isEmpty()) {
                 writer.addHeading("Champs standards");
-                for (TradingPlanSection section : plan.getSections()) {
-                    String label = section.getSectionKey().getLabel();
-                    String content = section.getContent() != null ? section.getContent() : "-";
-                    writer.addField(label, content);
+                for (TradingPlanSection section : filledSections) {
+                    writer.addField(section.getSectionKey().getLabel(), section.getContent());
                     if (section.getComment() != null && !section.getComment().isBlank()) {
                         writer.addComment(section.getComment());
                     }
                 }
             }
 
-            if (!plan.getCustomFields().isEmpty()) {
-                writer.addSeparator();
+            if (!filledFields.isEmpty()) {
+                if (!filledSections.isEmpty()) writer.addSeparator();
                 writer.addHeading("Champs personnalisés");
-                for (TradingPlanCustomField field : plan.getCustomFields()) {
-                    String value = field.getFieldValue() != null ? field.getFieldValue() : "-";
-                    writer.addField(field.getFieldName(), value);
+                for (TradingPlanCustomField field : filledFields) {
+                    writer.addField(field.getFieldName(), field.getFieldValue());
                     if (field.getComment() != null && !field.getComment().isBlank()) {
                         writer.addComment(field.getComment());
                     }
@@ -67,6 +73,7 @@ public class PdfBoxPlanExportAdapter implements PlanExportPort {
             throw new IllegalStateException("Failed to generate PDF", e);
         }
     }
+
 
     private static class PdfWriter {
         private final PDDocument document;
@@ -105,12 +112,20 @@ public class PdfBoxPlanExportAdapter implements PlanExportPort {
         }
 
         void addField(String label, String value) throws IOException {
-            String[] lines = wrap(label + " : " + value, 90);
+            checkSpace(LINE_HEIGHT * 2);
+            stream.setFont(fontBold, CONTENT_SIZE);
+            stream.beginText();
+            stream.newLineAtOffset(MARGIN, y);
+            stream.showText(sanitize(label) + " :");
+            stream.endText();
+            y -= LINE_HEIGHT;
+
+            String[] lines = wrap(value, 85);
             checkSpace(LINE_HEIGHT * lines.length);
             stream.setFont(fontRegular, CONTENT_SIZE);
             for (String line : lines) {
                 stream.beginText();
-                stream.newLineAtOffset(MARGIN, y);
+                stream.newLineAtOffset(MARGIN + 15f, y);
                 stream.showText(sanitize(line));
                 stream.endText();
                 y -= LINE_HEIGHT;
