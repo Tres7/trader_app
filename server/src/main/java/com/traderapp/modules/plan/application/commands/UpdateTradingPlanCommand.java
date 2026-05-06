@@ -9,5 +9,5 @@ public record UpdateTradingPlanCommand(
     List<CustomFieldCommand> customFields
 ) {
     public record SectionCommand(SectionKey key, String content, String comment) {}
-    public record CustomFieldCommand(String fieldName, String fieldValue, int displayOrder) {}
+    public record CustomFieldCommand(String fieldName, String fieldValue, int displayOrder, String comment) {}
 }

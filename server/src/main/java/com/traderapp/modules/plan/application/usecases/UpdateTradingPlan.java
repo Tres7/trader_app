@@ -43,7 +43,7 @@ public class UpdateTradingPlan {
 
         existingIds.forEach(plan::removeCustomField);
 
-        command.customFields().forEach(f -> plan.addCustomField(f.fieldName(), f.fieldValue(), f.displayOrder()));
+        command.customFields().forEach(f -> plan.addCustomField(f.fieldName(), f.fieldValue(), f.displayOrder(), f.comment()));
 
         TradingPlan saved = tradingPlanRepository.save(plan);
         

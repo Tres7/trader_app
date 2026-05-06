@@ -43,6 +43,7 @@ export interface CustomFieldPayload {
   fieldName: string;
   fieldValue: string;
   displayOrder: number;
+  comment?:string;
 }
 
 export interface UpdateTradingPlanPayload {

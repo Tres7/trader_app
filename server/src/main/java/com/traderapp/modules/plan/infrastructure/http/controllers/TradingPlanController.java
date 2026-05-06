@@ -56,7 +56,7 @@ public class TradingPlanController {
                 .map(s -> new UpdateTradingPlanCommand.SectionCommand(s.key(), s.content(), s.comment()))
                 .toList(),
             request.customFields().stream()
-                .map(f -> new UpdateTradingPlanCommand.CustomFieldCommand(f.fieldName(), f.fieldValue(), f.displayOrder()))
+                .map(f -> new UpdateTradingPlanCommand.CustomFieldCommand(f.fieldName(), f.fieldValue(), f.displayOrder(), f.comment()))
                 .toList()
         );
 

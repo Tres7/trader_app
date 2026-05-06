@@ -9,5 +9,5 @@ public record UpdateTradingPlanRequest(
         List<CustomFieldRequest> customFields
 ) {
     public record SectionRequest(SectionKey key, String content, String comment) {}
-    public record CustomFieldRequest(String fieldName, String fieldValue, int displayOrder) {}
+    public record CustomFieldRequest(String fieldName, String fieldValue, int displayOrder, String comment) {}
 }

@@ -26,20 +26,29 @@ export function usePlanScreen() {
     const [editingValue, setEditingValue] = useState('');
     const [editingFieldName, setEditingFieldName] = useState('');
 
-    const [commentEditing, setCommentEditing] = useState<{ key: string; label: string } | null>(null);
+    const [commentEditing, setCommentEditing] = useState<
+        | { type: 'section'; key: string; label: string } 
+        | { type: 'custom'; id: string; label: string }
+        | null>(null);
+    const [customFieldComments, setCustomFieldComments] = useState<Record<string, string>>({});
     const [commentValue, setCommentValue] = useState('');
 
     useEffect(() => {
         if (!data) return;
         const map: Record<string, string> = {};
         const comments: Record<string, string> = {};
+        const customComments: Record<string, string> = {};
         data.sections.forEach((s) => {
         map[s.key] = s.content ?? '';
         comments[s.key] = s.comment ?? '';
         });
+        data.customFields.forEach((f) => {
+            customComments[f.id] = f.comment ?? '';
+        });
         setDrafts(map);
         setSectionComments(comments);
         setCustomFields(data.customFields);
+        setCustomFieldComments(customComments)
     }, [data]);
 
     function openEdit(field: EditingField, currentValue: string) {
@@ -63,17 +72,29 @@ export function usePlanScreen() {
         }
         setEditing(null);
     }
-    
+
     function openCommentEdit(key: string, label: string) {
-        setCommentEditing({ key, label });
+        setCommentEditing({ type: 'section', key, label });
         setCommentValue(sectionComments[key] ?? '');
     }
 
+    function openCustomFieldCommentEdit(id: string, label: string) {
+        setCommentEditing({ type: 'custom', id, label });
+        setCommentValue(customFieldComments[id] ?? '');
+    }
+
     function confirmComment() {
-        if (!commentEditing) return;
-        setSectionComments((prev) => ({ ...prev, [commentEditing.key]: commentValue }));
+        if (!commentEditing) {
+            return;
+        }
+        if (commentEditing.type === 'section') {
+            setSectionComments((prev) => ({ ...prev, [commentEditing.key]: commentValue }));
+        } else {
+            setCustomFieldComments((prev) => ({ ...prev, [commentEditing.id]: commentValue }));
+        }
         setCommentEditing(null);
     }
+
 
     function addCustomField() {
         const field: TradingPlanCustomFieldResponse = {
@@ -99,6 +120,8 @@ export function usePlanScreen() {
 
     function removeCustomField(id: string) {
         setCustomFields((prev) => prev.filter((f) => f.id !== id));
+        setCustomFieldComments((prev) => { const { [id]: _, ...rest } = prev; return rest; });
+
     }
 
     function handleSave() {
@@ -112,6 +135,7 @@ export function usePlanScreen() {
                 fieldName: f.fieldName,
                 fieldValue: f.fieldValue ?? '',
                 displayOrder: i + 1,
+                comment: customFieldComments[f.id] ?? ''
             })),
         });
     }
@@ -139,6 +163,8 @@ export function usePlanScreen() {
         closeCommentEdit: () => setCommentEditing(null),
         addCustomField,
         removeCustomField,
+        customFieldComments,
+        openCustomFieldCommentEdit,
         handleSave,
         exportPlan,
     };

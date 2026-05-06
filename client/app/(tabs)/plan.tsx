@@ -27,7 +27,8 @@ export default function PlanScreen() {
     commentEditing, commentValue, setCommentValue,
     openCommentEdit, confirmComment, closeCommentEdit,
     addCustomField, removeCustomField,
-    handleSave, exportPlan,
+    handleSave, exportPlan, customFieldComments,
+    openCustomFieldCommentEdit,
   } = usePlanScreen();
 
   if (isLoading) {
@@ -106,16 +107,23 @@ export default function PlanScreen() {
                 content={field.fieldValue}
                 actions={
                     <>
-                        <TouchableOpacity
-                            onPress={() => {
-                            openEdit({ type: 'custom', id: field.id, label: field.fieldName }, field.fieldValue ?? '');
-                            setEditingFieldName(field.fieldName);
-                            }}>
-                            <Icon as={Pencil} size={16} className="text-muted-foreground" />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => removeCustomField(field.id)}>
-                            <Icon as={Trash2} size={16} className="text-muted-foreground" />
-                        </TouchableOpacity>
+                      <TouchableOpacity onPress={() => openCustomFieldCommentEdit(field.id, field.fieldName)}>
+                        <Icon
+                          as={MessageSquare}
+                          size={16}
+                          className={customFieldComments[field.id] ? 'text-green-500' : 'text-muted-foreground'}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                          onPress={() => {
+                          openEdit({ type: 'custom', id: field.id, label: field.fieldName }, field.fieldValue ?? '');
+                          setEditingFieldName(field.fieldName);
+                          }}>
+                          <Icon as={Pencil} size={16} className="text-muted-foreground" />
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => removeCustomField(field.id)}>
+                          <Icon as={Trash2} size={16} className="text-muted-foreground" />
+                      </TouchableOpacity>
                     </>
                 }
                 />

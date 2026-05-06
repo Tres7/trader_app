@@ -50,9 +50,9 @@ public class TradingPlan {
         touch();
     }
 
-    public void addCustomField(String fieldName, String fieldValue, int displayOrder) {
+    public void addCustomField(String fieldName, String fieldValue, int displayOrder, String comment) {
         customFields.add(new TradingPlanCustomField(
-            UUID.randomUUID(), this.id, fieldName, fieldValue, displayOrder, null,
+            UUID.randomUUID(), this.id, fieldName, fieldValue, displayOrder, comment,
             LocalDateTime.now(), LocalDateTime.now()
         ));
         touch();
