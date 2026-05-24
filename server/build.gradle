@@ -64,18 +64,43 @@ tasks.named('test') {
 tasks.register('unitTest', Test) {
     description = 'Runs unit tests'
     group = 'verification'
+    dependsOn testClasses
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
     useJUnitPlatform {
         excludeTags 'integration'
     }
     shouldRunAfter test
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+    }
 }
 
 tasks.register('integrationTest', Test) {
     description = 'Runs integration tests with Testcontainers.'
     group = 'verification'
+    dependsOn testClasses
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
     useJUnitPlatform {
         includeTags 'integration'
     }
     shouldRunAfter test
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+    }
 }
+
+tasks.register('jacocoUnitTestReport', JacocoReport) {
+    dependsOn unitTest
+    executionData layout.buildDirectory.file("jacoco/unitTest.exec")
+    sourceSets sourceSets.main
+}
+
+tasks.register('jacocoIntegrationTestReport', JacocoReport) {
+    dependsOn integrationTest
+    executionData layout.buildDirectory.file("jacoco/integrationTest.exec")
+    sourceSets sourceSets.main
+}
+
 
