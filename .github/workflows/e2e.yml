@@ -96,8 +96,11 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Install Android NDK
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.1.12297006"
+      - name: Install Android NDK and system image
+        run: |
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "ndk;27.1.12297006" \
+            "system-images;android-29;default;x86_64" > /dev/null
 
       - name: Generate Android native project
         working-directory: client
@@ -129,16 +132,40 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
+      - name: Cache AVD snapshot
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-29-x86_64-${{ runner.os }}
+
+      - name: Create AVD and warm up snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          arch: x86_64
+          target: default
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: false
+          emulator-boot-timeout: 1200
+          script: echo "AVD snapshot created"
+
       - name: Run E2E tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
           arch: x86_64
+          target: default
           profile: pixel_6
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -noaudio -no-boot-anim -no-window -gpu swiftshader_indirect
-          emulator-boot-timeout: 900
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: true
+          emulator-boot-timeout: 900
           script: |
             adb reverse tcp:8080 tcp:8080
             adb reverse tcp:8081 tcp:8081
