@@ -132,11 +132,12 @@ jobs:
       - name: Run E2E tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 35
+          api-level: 29
           arch: x86_64
           profile: pixel_6
           force-avd-creation: false
           emulator-options: -no-snapshot-save -noaudio -no-boot-anim -no-window -gpu swiftshader_indirect
+          emulator-boot-timeout: 900
           disable-animations: true
           script: |
             adb reverse tcp:8080 tcp:8080
