@@ -1,4 +1,4 @@
-package com.traderapp.auth.domain.entities;
+package com.traderapp.modules.auth.domain.entities;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import com.traderapp.modules.auth.domain.entities.EmailVerificationCode;
 
 public class EmailVerificationCodeTest {
     
@@ -28,6 +27,7 @@ public class EmailVerificationCodeTest {
         assertFalse(emailVerificationCode.isExpired());
     }
 
+    @Test
     void should_mark_code_as_used() {
         EmailVerificationCode emailVerificationCode = EmailVerificationCode.create(
             UUID.randomUUID(),

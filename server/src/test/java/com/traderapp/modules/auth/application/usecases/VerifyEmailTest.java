@@ -1,4 +1,4 @@
-package com.traderapp.auth.application;
+package com.traderapp.modules.auth.application.usecases;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.traderapp.modules.auth.application.commands.VerifyEmailCommand;
 import com.traderapp.modules.auth.application.events.UserEmailVerifiedEvent;
 import com.traderapp.modules.auth.application.ports.output.AuthEventPublisher;
-import com.traderapp.modules.auth.application.usecases.VerifyEmail;
 import com.traderapp.modules.auth.domain.entities.EmailVerificationCode;
 import com.traderapp.modules.auth.domain.entities.User;
 import com.traderapp.modules.auth.domain.exceptions.EmailAlreadyVerifiedException;
