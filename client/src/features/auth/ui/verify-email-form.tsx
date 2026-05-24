@@ -140,6 +140,7 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
               <Label htmlFor="code">Code de vérification</Label>
               <Input
                 id="code"
+                testID="verify-email-code-input"
                 autoCapitalize="none"
                 value={code}
                 onChangeText={setCode}
@@ -169,7 +170,7 @@ export function VerifyEmailForm({ email }: VerifyEmailFormProps) {
               <Text className="text-center text-sm text-muted-foreground">{infoMessage}</Text>
             ) : null}
             <View className="gap-3">
-              <Button className="w-full" onPress={onSubmit} disabled={isSubmitting}>
+              <Button testID="verify-email-submit-button" className="w-full" onPress={onSubmit} disabled={isSubmitting}>
                 <Text>{isSubmitting ? 'Verification...' : 'Continue'}</Text>
               </Button>
               <Button

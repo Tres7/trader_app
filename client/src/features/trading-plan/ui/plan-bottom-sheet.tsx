@@ -91,6 +91,7 @@ export function PlanBottomSheet({
               <Text className="text-xs text-muted-foreground mb-1">Valeur</Text>
             )}
             <TextInput
+              testID="plan-editor-value-input"
               value={value}
               onChangeText={onChangeValue}
               editable={!readOnly}
@@ -112,7 +113,7 @@ export function PlanBottomSheet({
 
           {/* Bouton confirm */}
           {!readOnly && onConfirm && (
-            <Button onPress={onConfirm} className="mt-4">
+            <Button testID="plan-editor-confirm-button" onPress={onConfirm} className="mt-4">
               <Text>{confirmLabel}</Text>
             </Button>
           )}

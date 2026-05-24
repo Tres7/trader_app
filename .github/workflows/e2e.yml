@@ -1,0 +1,132 @@
+name: E2E Tests
+
+on:
+  push:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-bookworm
+        env:
+          POSTGRES_DB: trader_app_e2e
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics check_port_connectivity"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Build backend
+        working-directory: server
+        run: ./gradlew bootJar -x test
+
+      - name: Start backend
+        working-directory: server
+        run: |
+          java -jar build/libs/*.jar \
+            --spring.profiles.active=test \
+            --spring.datasource.url=jdbc:postgresql://localhost:5432/trader_app_e2e \
+            --spring.datasource.username=postgres \
+            --spring.datasource.password=postgres \
+            --spring.flyway.enabled=true \
+            --spring.jpa.hibernate.ddl-auto=validate \
+            --spring.rabbitmq.host=localhost \
+            --spring.rabbitmq.port=5672 \
+            --JWT_SECRET=test-jwt-secret-for-e2e-tests-only-minimum-32-chars \
+            --MAIL_FROM=noreply@test.com &
+
+      - name: Wait for backend
+        run: |
+          for i in {1..30}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/v1/auth/login \
+              -H "Content-Type: application/json" -d '{}')
+            if [ "$STATUS" = "400" ] || [ "$STATUS" = "401" ] || [ "$STATUS" = "403" ]; then
+              echo "Backend is up (HTTP $STATUS)"
+              break
+            fi
+            echo "Attempt $i/30 (HTTP $STATUS)..."
+            sleep 3
+          done
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Build Android APK
+        working-directory: client/android
+        run: ./gradlew assembleDebug -x lint -x test --configure-on-demand -PreactNativeArchitectures=x86_64
+
+      - name: Start Metro bundler
+        working-directory: client
+        env:
+          EXPO_PUBLIC_API_BASE_URL: http://localhost:8080
+        run: npx expo start --port 8081 &
+
+      - name: Wait for Metro
+        run: |
+          for i in {1..30}; do
+            if curl -sf http://localhost:8081/status > /dev/null 2>&1; then
+              echo "Metro is up"
+              break
+            fi
+            echo "Attempt $i/30..."
+            sleep 2
+          done
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Run E2E tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -noaudio -no-boot-anim -no-window -gpu swiftshader_indirect
+          disable-animations: true
+          script: |
+            adb reverse tcp:8080 tcp:8080
+            adb reverse tcp:8081 tcp:8081
+            adb install client/android/app/build/outputs/apk/debug/app-debug.apk
+            sleep 10
+            maestro test .maestro/flows/sign-in.yaml
