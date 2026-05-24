@@ -96,6 +96,13 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      - name: Install Android NDK
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;27.1.12297006"
+
+      - name: Generate Android native project
+        working-directory: client
+        run: npx expo prebuild --platform android --no-install
+
       - name: Build Android APK
         working-directory: client/android
         run: ./gradlew assembleDebug -x lint -x test --configure-on-demand -PreactNativeArchitectures=x86_64
