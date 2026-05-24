@@ -32,6 +32,11 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      mailhog:
+        image: mailhog/mailhog
+        ports:
+          - 1025:1025
+
     steps:
       - uses: actions/checkout@v4
 
@@ -68,13 +73,15 @@ jobs:
             --spring.rabbitmq.host=localhost \
             --spring.rabbitmq.port=5672 \
             --JWT_SECRET=test-jwt-secret-for-e2e-tests-only-minimum-32-chars \
-            --MAIL_FROM=noreply@test.com &
+            --MAIL_FROM=noreply@test.com \
+            --spring.mail.host=localhost \
+            --spring.mail.port=1025 &
 
       - name: Wait for backend
         run: |
           for i in {1..30}; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/v1/auth/login \
-              -H "Content-Type: application/json" -d '{}')
+              -H "Content-Type: application/json" -d '{}' || echo "000")
             if [ "$STATUS" = "400" ] || [ "$STATUS" = "401" ] || [ "$STATUS" = "403" ]; then
               echo "Backend is up (HTTP $STATUS)"
               break
