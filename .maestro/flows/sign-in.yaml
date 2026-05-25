@@ -26,4 +26,4 @@ appId: com.traderapp.client
 - inputText: "Password123!"
 - tapOn:
     id: "sign-in-submit-button"
-- assertVisible: "Mon Plan de Trading"
+- assertVisible: "Bonjour, E2E"
