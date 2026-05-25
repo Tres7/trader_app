@@ -33,6 +33,6 @@ appId: com.traderapp.client
     text: "Une erreur est survenue"
 - extendedWaitUntil:
     visible:
-      id: "home-greeting"
+      text: "Bonjour"
     timeout: 120000
 - takeScreenshot: after-login
