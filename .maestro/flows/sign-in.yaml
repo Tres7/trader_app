@@ -14,8 +14,9 @@ appId: com.traderapp.client
       })
     });
 - launchApp
-- assertVisible:
-    text: "Connexion"
+- extendedWaitUntil:
+    visible:
+      text: "Connexion"
     timeout: 30000
 - tapOn:
     id: "sign-in-email-input"
