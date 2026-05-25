@@ -20,6 +20,6 @@ appId: com.traderapp.client
     text: "Une erreur est survenue"
 - extendedWaitUntil:
     visible:
-      text: "Bonjour"
+      id: "home-greeting"
     timeout: 120000
 - takeScreenshot: after-login
