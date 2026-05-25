@@ -31,6 +31,9 @@ appId: com.traderapp.client
 - tapOn:
     id: "sign-in-email-input"
 - inputText: "e2e.signin@test.com"
+- assertVisible:
+    id: "sign-in-email-input"
+    text: "e2e.signin@test.com"
 - tapOn:
     id: "sign-in-password-input"
 - inputText: "Password123!"

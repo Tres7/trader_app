@@ -89,7 +89,9 @@ jobs:
             --JWT_SECRET=test-jwt-secret-for-e2e-tests-only-minimum-32-chars \
             --MAIL_FROM=noreply@test.com \
             --spring.mail.host=localhost \
-            --spring.mail.port=1025 > $GITHUB_WORKSPACE/logs/backend.log 2>&1 &
+            --spring.mail.port=1025 \
+            --logging.level.com.traderapp=DEBUG \
+            --logging.level.org.springframework.security=DEBUG > $GITHUB_WORKSPACE/logs/backend.log 2>&1 &
 
       - name: Wait for backend
         run: |
