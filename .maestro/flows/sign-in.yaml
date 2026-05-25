@@ -27,6 +27,10 @@ appId: com.traderapp.client
 - tapOn:
     id: "sign-in-submit-button"
 - takeScreenshot: after-submit
+- assertNotVisible:
+    text: "Email ou mot de passe invalide"
+- assertNotVisible:
+    text: "Une erreur est survenue"
 - extendedWaitUntil:
     visible:
       id: "home-greeting"
