@@ -17,7 +17,7 @@ appId: com.traderapp.client
 - extendedWaitUntil:
     visible:
       text: "Connexion"
-    timeout: 30000
+    timeout: 120000
 - tapOn:
     id: "sign-in-email-input"
 - inputText: "e2e.signin@test.com"

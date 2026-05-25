@@ -136,6 +136,11 @@ jobs:
             sleep 2
           done
 
+      - name: Pre-warm Metro bundle
+        run: |
+          curl -sf "http://localhost:8081/index.bundle?platform=android&dev=true&minify=false" -o /dev/null || true
+          echo "Bundle pre-warmed"
+
       - name: Install Maestro
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
