@@ -2,7 +2,7 @@ appId: com.traderapp.client
 ---
 - evalScript: |
     http.delete("http://localhost:8080/api/v1/test/users/e2e.signin@test.com");
-    http.post("http://localhost:8080/api/v1/test/seed-verified-user", {
+    var seedResult = http.post("http://localhost:8080/api/v1/test/seed-verified-user", {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: "e2e.signin@test.com",
@@ -13,6 +13,9 @@ appId: com.traderapp.client
         country: "FR"
       })
     });
+    if (seedResult.status >= 400) {
+      throw new Error("Seed failed: HTTP " + seedResult.status + " - " + seedResult.body);
+    }
 - launchApp
 - extendedWaitUntil:
     visible:
