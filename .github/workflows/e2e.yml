@@ -40,6 +40,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: android-actions/setup-android@v3
+        with:
+          log-accepted-android-sdk-licenses: false
+
       - name: Free disk space
         run: |
           sudo rm -rf /usr/share/dotnet
@@ -72,7 +76,7 @@ jobs:
       - name: Start backend
         working-directory: server
         run: |
-          java -jar build/libs/*.jar \
+          java -Xmx512m -jar build/libs/*.jar \
             --spring.profiles.active=test \
             --spring.datasource.url=jdbc:postgresql://localhost:5432/trader_app_e2e \
             --spring.datasource.username=postgres \
@@ -145,6 +149,16 @@ jobs:
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Check backend is still alive
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/v1/auth/login \
+            -H "Content-Type: application/json" -d '{}' || echo "000")
+          echo "Backend status: $STATUS"
+          if [ "$STATUS" = "000" ]; then
+            echo "Backend is down!"
+            exit 1
+          fi
 
       - name: Cache AVD snapshot
         uses: actions/cache@v4

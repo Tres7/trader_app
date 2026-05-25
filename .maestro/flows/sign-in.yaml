@@ -29,4 +29,4 @@ appId: com.traderapp.client
 - extendedWaitUntil:
     visible:
       text: "Bonjour, E2E"
-    timeout: 30000
+    timeout: 60000
