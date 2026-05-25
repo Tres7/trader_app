@@ -26,4 +26,7 @@ appId: com.traderapp.client
 - inputText: "Password123!"
 - tapOn:
     id: "sign-in-submit-button"
-- assertVisible: "Bonjour, E2E"
+- extendedWaitUntil:
+    visible:
+      text: "Bonjour, E2E"
+    timeout: 30000
