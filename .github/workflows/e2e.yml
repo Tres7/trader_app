@@ -76,6 +76,7 @@ jobs:
       - name: Start backend
         working-directory: server
         run: |
+          mkdir -p $GITHUB_WORKSPACE/logs
           java -Xmx512m -jar build/libs/*.jar \
             --spring.profiles.active=test \
             --spring.datasource.url=jdbc:postgresql://localhost:5432/trader_app_e2e \
@@ -88,7 +89,7 @@ jobs:
             --JWT_SECRET=test-jwt-secret-for-e2e-tests-only-minimum-32-chars \
             --MAIL_FROM=noreply@test.com \
             --spring.mail.host=localhost \
-            --spring.mail.port=1025 &
+            --spring.mail.port=1025 > $GITHUB_WORKSPACE/logs/backend.log 2>&1 &
 
       - name: Wait for backend
         run: |
@@ -199,4 +200,19 @@ jobs:
             adb reverse tcp:8081 tcp:8081
             adb install client/android/app/build/outputs/apk/debug/app-debug.apk
             sleep 10
-            maestro test .maestro/flows/sign-in.yaml
+            adb logcat -c
+            adb logcat > $GITHUB_WORKSPACE/logs/device.log &
+            LOGCAT_PID=$!
+            maestro test .maestro/flows/sign-in.yaml 2>&1 | tee $GITHUB_WORKSPACE/logs/maestro-output.log || MAESTRO_FAILED=1
+            kill $LOGCAT_PID 2>/dev/null || true
+            exit ${MAESTRO_FAILED:-0}
+
+      - name: Upload E2E artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: |
+            *.png
+            logs/
+          if-no-files-found: ignore

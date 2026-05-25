@@ -26,7 +26,9 @@ appId: com.traderapp.client
 - inputText: "Password123!"
 - tapOn:
     id: "sign-in-submit-button"
+- takeScreenshot: after-submit
 - extendedWaitUntil:
     visible:
-      text: "Bonjour, E2E"
-    timeout: 60000
+      id: "home-greeting"
+    timeout: 120000
+- takeScreenshot: after-login
