@@ -34,6 +34,9 @@ appId: com.traderapp.client
 - tapOn:
     id: "sign-in-password-input"
 - inputText: "Password123!"
+- assertVisible:
+    id: "sign-in-password-input"
+    text: "Password123!"
 - tapOn:
     id: "sign-in-submit-button"
 - takeScreenshot: after-submit
