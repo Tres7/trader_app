@@ -89,9 +89,7 @@ jobs:
             --JWT_SECRET=test-jwt-secret-for-e2e-tests-only-minimum-32-chars \
             --MAIL_FROM=noreply@test.com \
             --spring.mail.host=localhost \
-            --spring.mail.port=1025 \
-            --logging.level.com.traderapp=DEBUG \
-            --logging.level.org.springframework.security=DEBUG > $GITHUB_WORKSPACE/logs/backend.log 2>&1 &
+            --spring.mail.port=1025 > $GITHUB_WORKSPACE/logs/backend.log 2>&1 &
 
       - name: Wait for backend
         run: |
@@ -162,6 +160,20 @@ jobs:
             echo "Backend is down!"
             exit 1
           fi
+
+      - name: Seed E2E test user
+        run: |
+          curl -s -X DELETE "http://localhost:8080/api/v1/test/users/e2e.signin%40test.com" || true
+          SEED=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/v1/test/seed-verified-user \
+            -H "Content-Type: application/json" \
+            -d '{"email":"e2e.signin@test.com","password":"Password123!","firstName":"E2E","lastName":"Test","birthDate":"1990-01-01","country":"FR"}')
+          echo "Seed: $SEED"
+          [ "$SEED" = "200" ] || exit 1
+          LOGIN=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/v1/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"e2e.signin@test.com","password":"Password123!"}')
+          echo "Login check: $LOGIN"
+          [ "$LOGIN" = "200" ] || exit 1
 
       - name: Cache AVD snapshot
         uses: actions/cache@v4

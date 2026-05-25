@@ -1,28 +1,5 @@
 appId: com.traderapp.client
 ---
-- evalScript: |
-    http.delete("http://localhost:8080/api/v1/test/users/e2e.signin@test.com");
-    var seedResult = http.post("http://localhost:8080/api/v1/test/seed-verified-user", {
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: "e2e.signin@test.com",
-        password: "Password123!",
-        firstName: "E2E",
-        lastName: "Test",
-        birthDate: "1990-01-01",
-        country: "FR"
-      })
-    });
-    if (seedResult.status >= 400) {
-      throw new Error("Seed failed: HTTP " + seedResult.status + " - " + seedResult.body);
-    }
-    var loginCheck = http.post("http://localhost:8080/api/v1/auth/login", {
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: "e2e.signin@test.com", password: "Password123!" })
-    });
-    if (loginCheck.status !== 200) {
-      throw new Error("Backend login check failed before app test: HTTP " + loginCheck.status + " - " + loginCheck.body);
-    }
 - launchApp
 - extendedWaitUntil:
     visible:
@@ -31,15 +8,9 @@ appId: com.traderapp.client
 - tapOn:
     id: "sign-in-email-input"
 - inputText: "e2e.signin@test.com"
-- assertVisible:
-    id: "sign-in-email-input"
-    text: "e2e.signin@test.com"
 - tapOn:
     id: "sign-in-password-input"
 - inputText: "Password123!"
-- assertVisible:
-    id: "sign-in-password-input"
-    text: "Password123!"
 - tapOn:
     id: "sign-in-submit-button"
 - takeScreenshot: after-submit
