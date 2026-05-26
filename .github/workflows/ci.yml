@@ -32,6 +32,9 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: server
       - name: Build backend
-        run: ./gradlew build
+        run: ./gradlew assemble
+        working-directory: server
+      - name: Run unit tests
+        run: ./gradlew unitTest
         working-directory: server
 

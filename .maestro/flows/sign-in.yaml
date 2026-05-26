@@ -1,0 +1,25 @@
+appId: com.traderapp.client
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      text: "Connexion"
+    timeout: 120000
+- tapOn:
+    id: "sign-in-email-input"
+- inputText: "e2e.signin@test.com"
+- tapOn:
+    id: "sign-in-password-input"
+- inputText: "Password123!"
+- tapOn:
+    id: "sign-in-submit-button"
+- takeScreenshot: after-submit
+- assertNotVisible:
+    text: "Email ou mot de passe invalide"
+- assertNotVisible:
+    text: "Une erreur est survenue"
+- extendedWaitUntil:
+    visible:
+      id: "home-greeting"
+    timeout: 120000
+- takeScreenshot: after-login

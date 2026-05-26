@@ -21,26 +21,26 @@ public class RabbitMqAuthEventPublisher implements AuthEventPublisher {
     @Override
     public void publishUserRegistered(UserRegisteredEvent event) {
         rabbitTemplate.convertAndSend(
-                RabbitMqConfig.NOTIFICATION_EXCHANGE,
-                RabbitMqConfig.USER_REGISTERED_ROUTING_KEY,
-                event
+            RabbitMqAuthConfig.AUTH_EXCHANGE,
+            RabbitMqAuthConfig.USER_REGISTERED_ROUTING_KEY,
+            event
         );
     }
 
     @Override
     public void publishUserEmailVerified(UserEmailVerifiedEvent event) {
         rabbitTemplate.convertAndSend(
-                RabbitMqConfig.NOTIFICATION_EXCHANGE,
-                RabbitMqConfig.USER_EMAIL_VERIFIED_ROUTING_KEY,
-                event
+            RabbitMqAuthConfig.AUTH_EXCHANGE,
+            RabbitMqAuthConfig.USER_EMAIL_VERIFIED_ROUTING_KEY,
+            event
         );
     }
 
     @Override
     public void publishPasswordResetRequested(PasswordResetRequestedEvent event) {
         rabbitTemplate.convertAndSend(
-            RabbitMqConfig.NOTIFICATION_EXCHANGE,
-            RabbitMqConfig.PASSWORD_RESET_ROUTING_KEY,
+            RabbitMqAuthConfig.AUTH_EXCHANGE,
+            RabbitMqAuthConfig.PASSWORD_RESET_ROUTING_KEY,
             event
         );
     }
@@ -48,11 +48,9 @@ public class RabbitMqAuthEventPublisher implements AuthEventPublisher {
     @Override
     public void publishPasswordResetCompleted(PasswordResetCompletedEvent event) {
         rabbitTemplate.convertAndSend(
-                RabbitMqConfig.NOTIFICATION_EXCHANGE,
-                RabbitMqConfig.PASSWORD_RESET_COMPLETED_ROUTING_KEY,
-                event
+            RabbitMqAuthConfig.AUTH_EXCHANGE,
+            RabbitMqAuthConfig.PASSWORD_RESET_COMPLETED_ROUTING_KEY,
+            event
         );
     }
-
-
 }

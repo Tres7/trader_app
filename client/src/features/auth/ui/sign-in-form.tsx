@@ -90,6 +90,7 @@ export function SignInForm() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                testID="sign-in-email-input"
                 value={email}
                 onChangeText={setEmail}
                 placeholder="m@example.com"
@@ -117,6 +118,7 @@ export function SignInForm() {
               <Input
                 ref={passwordInputRef}
                 id="password"
+                testID="sign-in-password-input"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry = {isPasswordVisible}
@@ -134,7 +136,7 @@ export function SignInForm() {
                   )}
                 </Pressable>
             </View>
-            <Button className="w-full" onPress={onSubmit} disabled={isSubmitting}>
+            <Button testID="sign-in-submit-button" className="w-full" onPress={onSubmit} disabled={isSubmitting}>
               <Text>{isSubmitting? 'Connexion...' : 'Se connecter'}</Text>
             </Button>
           </View>

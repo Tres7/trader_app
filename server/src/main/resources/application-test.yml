@@ -9,11 +9,23 @@ spring:
       ddl-auto: create-drop
     show-sql: false
 
+  flyway:
+    enabled: false
+
   rabbitmq:
     host: ${TEST_RABBITMQ_HOST:localhost}
     port: ${TEST_RABBITMQ_PORT:5672}
     username: ${TEST_RABBITMQ_USERNAME:guest}
     password: ${TEST_RABBITMQ_PASSWORD:guest}
+
+JWT_SECRET: test-jwt-secret-for-integration-tests-only-minimum-32-chars
+MAIL_FROM: test@example.com
+
+mail:
+  host: localhost
+  port: 25
+  username: test@example.com
+  password: test
 
 logging:
   level:

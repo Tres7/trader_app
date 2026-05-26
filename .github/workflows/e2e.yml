@@ -1,0 +1,234 @@
+name: E2E Tests
+
+on:
+  push:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-bookworm
+        env:
+          POSTGRES_DB: trader_app_e2e
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+          - 5672:5672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics check_port_connectivity"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mailhog:
+        image: mailhog/mailhog
+        ports:
+          - 1025:1025
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: android-actions/setup-android@v3
+        with:
+          log-accepted-android-sdk-licenses: false
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/chromium
+          sudo rm -rf /usr/share/swift
+          df -h
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Build backend
+        working-directory: server
+        run: ./gradlew bootJar -x test
+
+      - name: Start backend
+        working-directory: server
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/logs
+          java -Xmx512m -jar build/libs/*.jar \
+            --spring.profiles.active=test \
+            --spring.datasource.url=jdbc:postgresql://localhost:5432/trader_app_e2e \
+            --spring.datasource.username=postgres \
+            --spring.datasource.password=postgres \
+            --spring.flyway.enabled=true \
+            --spring.jpa.hibernate.ddl-auto=validate \
+            --spring.rabbitmq.host=localhost \
+            --spring.rabbitmq.port=5672 \
+            --JWT_SECRET=test-jwt-secret-for-e2e-tests-only-minimum-32-chars \
+            --MAIL_FROM=noreply@test.com \
+            --spring.mail.host=localhost \
+            --spring.mail.port=1025 > $GITHUB_WORKSPACE/logs/backend.log 2>&1 &
+
+      - name: Wait for backend
+        run: |
+          for i in {1..30}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/v1/auth/login \
+              -H "Content-Type: application/json" -d '{}' || echo "000")
+            if [ "$STATUS" = "400" ] || [ "$STATUS" = "401" ] || [ "$STATUS" = "403" ]; then
+              echo "Backend is up (HTTP $STATUS)"
+              break
+            fi
+            echo "Attempt $i/30 (HTTP $STATUS)..."
+            sleep 3
+          done
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Android NDK and system image
+        run: |
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "ndk;27.1.12297006" \
+            "system-images;android-29;default;x86_64" > /dev/null
+
+      - name: Generate Android native project
+        working-directory: client
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Build Android APK
+        working-directory: client/android
+        run: ./gradlew assembleDebug -x lint -x test --configure-on-demand -PreactNativeArchitectures=x86_64
+
+      - name: Start Metro bundler
+        working-directory: client
+        env:
+          EXPO_PUBLIC_API_BASE_URL: http://localhost:8080
+        run: npx expo start --port 8081 &
+
+      - name: Wait for Metro
+        run: |
+          for i in {1..30}; do
+            if curl -sf http://localhost:8081/status > /dev/null 2>&1; then
+              echo "Metro is up"
+              break
+            fi
+            echo "Attempt $i/30..."
+            sleep 2
+          done
+
+      - name: Pre-warm Metro bundle
+        run: |
+          curl -sf "http://localhost:8081/index.bundle?platform=android&dev=true&minify=false" -o /dev/null || true
+          echo "Bundle pre-warmed"
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Check backend is still alive
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/v1/auth/login \
+            -H "Content-Type: application/json" -d '{}' || echo "000")
+          echo "Backend status: $STATUS"
+          if [ "$STATUS" = "000" ]; then
+            echo "Backend is down!"
+            exit 1
+          fi
+
+      - name: Seed E2E test user
+        run: |
+          curl -s -X DELETE "http://localhost:8080/api/v1/test/users/e2e.signin%40test.com" || true
+          SEED=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/v1/test/seed-verified-user \
+            -H "Content-Type: application/json" \
+            -d '{"email":"e2e.signin@test.com","password":"Password123!","firstName":"E2E","lastName":"Test","birthDate":"1990-01-01","country":"FR"}')
+          echo "Seed: $SEED"
+          [ "$SEED" = "200" ] || exit 1
+          LOGIN=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8080/api/v1/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"email":"e2e.signin@test.com","password":"Password123!"}')
+          echo "Login check: $LOGIN"
+          [ "$LOGIN" = "200" ] || exit 1
+
+      - name: Cache AVD snapshot
+        uses: actions/cache@v4
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-29-x86_64-${{ runner.os }}
+
+      - name: Create AVD and warm up snapshot
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          arch: x86_64
+          target: default
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: false
+          emulator-boot-timeout: 1200
+          script: echo "AVD snapshot created"
+
+      - name: Run E2E tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          arch: x86_64
+          target: default
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          emulator-boot-timeout: 900
+          script: |
+            adb reverse tcp:8080 tcp:8080
+            adb reverse tcp:8081 tcp:8081
+            adb install client/android/app/build/outputs/apk/debug/app-debug.apk
+            sleep 10
+            adb logcat -c
+            adb logcat > $GITHUB_WORKSPACE/logs/device.log &
+            LOGCAT_PID=$!
+            maestro test .maestro/flows/sign-in.yaml > $GITHUB_WORKSPACE/logs/maestro-output.log 2>&1
+            MAESTRO_FAILED=$?
+            cat $GITHUB_WORKSPACE/logs/maestro-output.log
+            kill $LOGCAT_PID 2>/dev/null || true
+            exit $MAESTRO_FAILED
+
+      - name: Upload E2E artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-artifacts
+          path: |
+            logs/
+            /home/runner/.maestro/tests/
+          if-no-files-found: ignore

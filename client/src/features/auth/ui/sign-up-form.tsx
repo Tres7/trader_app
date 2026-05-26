@@ -142,6 +142,7 @@ export function SignUpForm() {
               <Input
                 ref={firstNameInputRef}
                 id="firstName"
+                testID="sign-up-firstname-input"
                 value= {firstName}
                 onChangeText={setFirstName}
                 placeholder="Amah"
@@ -155,6 +156,7 @@ export function SignUpForm() {
               <Input
                 ref={lastNameInputRef}
                 id="lastName"
+                testID="sign-up-lastname-input"
                 value= {lastName}
                 onChangeText={setLastName}
                 placeholder="KWACTCHAH"
@@ -165,7 +167,7 @@ export function SignUpForm() {
             </View>
             <View className="gap-1.5">
               <Label htmlFor="birthDate">Date de naissance</Label>
-              <Pressable onPress={openBirthDatePicker}>
+              <Pressable testID="sign-up-birthdate-picker" onPress={openBirthDatePicker}>
                 <Input
                   id="birthDate"
                   placeholder="JJ/MM/AAAA"
@@ -190,6 +192,7 @@ export function SignUpForm() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                testID="sign-up-email-input"
                 placeholder="m@example.com"
                 keyboardType="email-address"
                 autoComplete="email"
@@ -206,6 +209,7 @@ export function SignUpForm() {
               <Input
                 ref={countryInputRef}
                 id="country"
+                testID="sign-up-country-input"
                 value={country}
                 onChangeText={setCountry}
                 placeholder="TG"
@@ -221,6 +225,7 @@ export function SignUpForm() {
               <Input
                 ref={passwordInputRef}
                 id="password"
+                testID="sign-up-password-input"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry = {isPasswordVisible}
@@ -239,7 +244,7 @@ export function SignUpForm() {
                 </Pressable>
             </View>
             {errorMessage ? <ErrorAlert title={errorMessage} /> : null}
-            <Button className="w-full" onPress={onSubmit} disabled={isSubmitting}>
+            <Button testID="sign-up-submit-button" className="w-full" onPress={onSubmit} disabled={isSubmitting}>
               <Text>{isSubmitting ? 'Creation...' : 'Continue'}</Text>
             </Button>
           </View>

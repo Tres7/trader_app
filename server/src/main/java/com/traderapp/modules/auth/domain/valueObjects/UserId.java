@@ -17,7 +17,7 @@ public final class UserId {
         return new UserId(UUID.randomUUID());
     }
 
-        public static UserId from(String value) {
+    public static UserId from(String value) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException("User id cannot be null or blank");
         }
