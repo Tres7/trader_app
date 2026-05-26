@@ -31,7 +31,7 @@ export default function ProfileScreen() {
       </View>
 
       <View className="items-center pt-6 mt-auto">
-        <Button variant="destructive" className="self-center" onPress={onLogout}>
+        <Button testID="profile-logout-button" variant="destructive" className="self-center" onPress={onLogout}>
           <Text>Se déconnecter</Text>
         </Button>
       </View>

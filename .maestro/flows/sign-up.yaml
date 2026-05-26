@@ -1,0 +1,24 @@
+appId: com.traderapp.client
+---
+- launchApp
+- tapOn: "Inscription"
+- tapOn:
+    id: "sign-up-firstname-input"
+- inputText: "Alice"
+- tapOn:
+    id: "sign-up-lastname-input"
+- inputText: "Dupont"
+- tapOn:
+    id: "sign-up-birthdate-picker"
+- tapOn:
+    id: "sign-up-email-input"
+- inputText: "e2e.signup@test.com"
+- tapOn:
+    id: "sign-up-country-input"
+- inputText: "FR"
+- tapOn:
+    id: "sign-up-password-input"
+- inputText: "Password123!"
+- tapOn:
+    id: "sign-up-submit-button"
+- assertVisible: "Vérifier votre email"

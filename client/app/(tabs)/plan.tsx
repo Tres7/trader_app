@@ -55,7 +55,7 @@ export default function PlanScreen() {
       </View>
 
       <View className="px-4 pb-4 items-center">
-        <Button onPress={handleSave} disabled={isSaving}>
+        <Button testID="plan-save-button" onPress={handleSave} disabled={isSaving}>
           <Text>{isSaving ? 'Enregistrement...' : 'Enregistrer le plan'}</Text>
         </Button>
       </View>
@@ -79,7 +79,7 @@ export default function PlanScreen() {
                             className={sectionComments[key] ? 'text-green-500' : 'text-muted-foreground'}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={() => openEdit({ type: 'section', key, label: SECTION_LABELS[key] }, drafts[key] ?? '')}>
+                        <TouchableOpacity testID={`plan-section-edit-${key}`} onPress={() => openEdit({ type: 'section', key, label: SECTION_LABELS[key] }, drafts[key] ?? '')}>
                             <Icon as={Pencil} size={16} className="text-muted-foreground" />
                         </TouchableOpacity>
                     </>

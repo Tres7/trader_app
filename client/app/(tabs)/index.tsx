@@ -7,8 +7,8 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 items-center justify-center px-6">
-      <Text className="text-center text-3xl font-bold">
-        Bonjour{user?.firstName ? `, ${user.firstName}` : ''}
+      <Text testID="home-greeting" className="text-center text-3xl font-bold">
+        {user?.firstName ? `Bonjour, ${user.firstName}` : 'Bonjour'}
       </Text>
       <Text className="text-muted-foreground mt-3 text-center text-base">
         Bienvenue dans votre espace TraderApp.
