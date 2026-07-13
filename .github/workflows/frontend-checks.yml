@@ -4,21 +4,34 @@ on:
   push:
     branches-ignore:
       - main
-    paths:
-      - 'client/**'
   pull_request:
     branches:
       - main
-    paths:
-      - 'client/**'
 
 concurrency:
   group: frontend-checks-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      client: ${{ steps.filter.outputs.client }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            client:
+              - 'client/**'
+
   unit-tests:
     name: Lint + unit tests
+    needs: changes
+    if: needs.changes.outputs.client == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -43,7 +56,8 @@ jobs:
 
   type-check:
     name: Type check
-    if: github.event_name == 'pull_request'
+    needs: changes
+    if: needs.changes.outputs.client == 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

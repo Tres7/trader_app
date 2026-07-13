@@ -4,21 +4,35 @@ on:
   push:
     branches-ignore:
       - main
-    paths:
-      - 'server/**'
   pull_request:
     branches:
       - main
-    paths:
-      - 'server/**'
 
 concurrency:
   group: backend-checks-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      server: ${{ steps.filter.outputs.server }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            server:
+              - 'server/**'
+              - 'compose.yaml'
+
   unit-tests:
     name: Unit tests
+    needs: changes
+    if: needs.changes.outputs.server == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -39,8 +53,8 @@ jobs:
 
   integration-tests:
     name: Integration tests
-    needs: unit-tests
-    if: github.event_name == 'pull_request'
+    needs: [changes, unit-tests]
+    if: needs.changes.outputs.server == 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -61,7 +75,8 @@ jobs:
 
   hadolint:
     name: Hadolint
-    if: github.event_name == 'pull_request'
+    needs: changes
+    if: needs.changes.outputs.server == 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -82,10 +97,12 @@ jobs:
 
   compose-config:
     name: docker compose config
-    if: github.event_name == 'pull_request'
+    needs: changes
+    if: needs.changes.outputs.server == 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+
       - name: Prepare env file for validation
         run: cp server/.env.example server/.env
 
