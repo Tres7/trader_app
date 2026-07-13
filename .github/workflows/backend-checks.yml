@@ -2,8 +2,8 @@ name: Backend checks
 
 on:
   push:
-    branches:
-      - 'feat/**'
+    branches-ignore:
+      - main
     paths:
       - 'server/**'
   pull_request:

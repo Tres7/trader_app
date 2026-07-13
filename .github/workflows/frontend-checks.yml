@@ -2,8 +2,8 @@ name: Frontend checks
 
 on:
   push:
-    branches:
-      - 'feat/**'
+    branches-ignore:
+      - main
     paths:
       - 'client/**'
   pull_request:
