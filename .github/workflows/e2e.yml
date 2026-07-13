@@ -239,15 +239,20 @@ jobs:
             MAESTRO_FAILED=$?
             cat $GITHUB_WORKSPACE/logs/maestro-output.log
             kill $LOGCAT_PID 2>/dev/null || true
-            echo "maestro_failed=$MAESTRO_FAILED" >> "$GITHUB_OUTPUT"
+            echo "$MAESTRO_FAILED" > "$GITHUB_WORKSPACE/logs/maestro-exit-code.txt"
             adb emu kill || true
             exit $MAESTRO_FAILED
 
       - name: Check E2E test result
         if: always()
         run: |
-          if [ "${{ steps.e2e_tests.outputs.maestro_failed }}" != "0" ]; then
-            echo "Maestro result: '${{ steps.e2e_tests.outputs.maestro_failed }}' (empty means the step never got to report it, e.g. boot failure)"
+          if [ ! -f logs/maestro-exit-code.txt ]; then
+            echo "Result file missing — Maestro never finished (e.g. boot failure or crash before the script completed)."
+            exit 1
+          fi
+          CODE=$(cat logs/maestro-exit-code.txt)
+          if [ "$CODE" != "0" ]; then
+            echo "Maestro failed with exit code $CODE"
             exit 1
           fi
           echo "E2E tests passed."
