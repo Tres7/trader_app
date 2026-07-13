@@ -214,7 +214,9 @@ jobs:
           script: echo "AVD snapshot created"
 
       - name: Run E2E tests
-        timeout-minutes: 15
+        id: e2e_tests
+        continue-on-error: true
+        timeout-minutes: 5
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -237,8 +239,18 @@ jobs:
             MAESTRO_FAILED=$?
             cat $GITHUB_WORKSPACE/logs/maestro-output.log
             kill $LOGCAT_PID 2>/dev/null || true
+            echo "maestro_failed=$MAESTRO_FAILED" >> "$GITHUB_OUTPUT"
             adb emu kill || true
             exit $MAESTRO_FAILED
+
+      - name: Check E2E test result
+        if: always()
+        run: |
+          if [ "${{ steps.e2e_tests.outputs.maestro_failed }}" != "0" ]; then
+            echo "Maestro result: '${{ steps.e2e_tests.outputs.maestro_failed }}' (empty means the step never got to report it, e.g. boot failure)"
+            exit 1
+          fi
+          echo "E2E tests passed."
 
       - name: Upload E2E artifacts
         if: always()
