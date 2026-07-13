@@ -9,6 +9,7 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
 
     services:
       postgres:
@@ -199,6 +200,7 @@ jobs:
 
       - name: Create AVD and warm up snapshot
         if: steps.avd-cache.outputs.cache-hit != 'true'
+        timeout-minutes: 15
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -212,6 +214,7 @@ jobs:
           script: echo "AVD snapshot created"
 
       - name: Run E2E tests
+        timeout-minutes: 15
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -234,6 +237,7 @@ jobs:
             MAESTRO_FAILED=$?
             cat $GITHUB_WORKSPACE/logs/maestro-output.log
             kill $LOGCAT_PID 2>/dev/null || true
+            adb emu kill || true
             exit $MAESTRO_FAILED
 
       - name: Upload E2E artifacts
