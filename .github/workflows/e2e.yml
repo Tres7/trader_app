@@ -113,7 +113,17 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      - name: Cache Android SDK (NDK + system image)
+        id: android-sdk-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/ndk/27.1.12297006
+            /usr/local/lib/android/sdk/system-images/android-29
+          key: android-sdk-ndk27.1.12297006-sysimg-android-29-x86_64-${{ runner.os }}
+
       - name: Install Android NDK and system image
+        if: steps.android-sdk-cache.outputs.cache-hit != 'true'
         run: |
           $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
             "ndk;27.1.12297006" \
