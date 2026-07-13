@@ -35,3 +35,6 @@
 .env
 /.codex
 
+# trello tool (contient la clé API + le token une fois rempli)
+/tools/trello/seed-board.js
+

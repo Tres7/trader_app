@@ -1,0 +1,124 @@
+name: Security checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: security-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gitleaks:
+    name: Gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  npm-audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: client
+
+      - name: Audit
+        run: npm audit --audit-level=high
+        working-directory: client
+
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    if: ${{ secrets.SONAR_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+        working-directory: server
+
+      - name: Generate backend coverage report (Jacoco XML)
+        run: ./gradlew jacocoUnitTestReport
+        working-directory: server
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: client
+
+      - name: Generate frontend coverage report (lcov)
+        run: npm run test:coverage -- --ci
+        working-directory: client
+      - uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.projectKey=${{ github.repository_owner }}_${{ github.event.repository.name }}
+            -Dsonar.exclusions=client/node_modules/**,client/.expo/**,client/android/**,server/build/**,server/bin/**,server/.gradle/**
+            -Dsonar.coverage.jacoco.xmlReportPaths=server/build/reports/jacoco/jacocoUnitTestReport/jacocoUnitTestReport.xml
+            -Dsonar.javascript.lcov.reportPaths=client/coverage/lcov.info
+
+  trivy:
+    name: Trivy (image scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check if backend image is affected
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'server/**'
+
+      - name: Build ephemeral image
+        if: steps.filter.outputs.backend == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: server
+          push: false
+          load: true
+          tags: traderapp-server:scan
+
+      - name: Scan image with Trivy
+        if: steps.filter.outputs.backend == 'true'
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: traderapp-server:scan
+          format: table
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true

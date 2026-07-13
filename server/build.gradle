@@ -95,12 +95,18 @@ tasks.register('jacocoUnitTestReport', JacocoReport) {
     dependsOn unitTest
     executionData layout.buildDirectory.file("jacoco/unitTest.exec")
     sourceSets sourceSets.main
+    reports {
+        xml.required = true
+    }
 }
 
 tasks.register('jacocoIntegrationTestReport', JacocoReport) {
     dependsOn integrationTest
     executionData layout.buildDirectory.file("jacoco/integrationTest.exec")
     sourceSets sourceSets.main
+    reports {
+        xml.required = true
+    }
 }
 
 
