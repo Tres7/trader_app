@@ -136,7 +136,7 @@ jobs:
 
       - name: Build Android APK
         working-directory: client/android
-        run: ./gradlew assembleDebug -x lint -x test --configure-on-demand -PreactNativeArchitectures=x86_64
+        run: ./gradlew assembleDebug -x lint -x test --configure-on-demand --build-cache -PreactNativeArchitectures=x86_64
 
       - name: Start Metro bundler
         working-directory: client
@@ -215,6 +215,31 @@ jobs:
 
       - name: Run E2E tests
         id: e2e_tests
+        continue-on-error: true
+        timeout-minutes: 5
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          arch: x86_64
+          target: default
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: true
+          emulator-boot-timeout: 900
+          script: bash "$GITHUB_WORKSPACE/.github/scripts/run-e2e-tests.sh"
+
+      - name: Clean up before retry
+        if: steps.e2e_tests.outcome == 'failure'
+        run: |
+          pkill -9 -f qemu-system || true
+          pkill -9 -f emulator || true
+          adb kill-server || true
+          sleep 5
+
+      - name: Run E2E tests (retry)
+        id: e2e_tests_retry
+        if: steps.e2e_tests.outcome == 'failure'
         continue-on-error: true
         timeout-minutes: 5
         uses: reactivecircus/android-emulator-runner@v2
