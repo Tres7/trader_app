@@ -230,7 +230,7 @@ jobs:
           script: bash "$GITHUB_WORKSPACE/.github/scripts/run-e2e-tests.sh"
 
       - name: Clean up before retry
-        if: steps.e2e_tests.outcome == 'failure'
+        if: steps.e2e_tests.outcome == 'failure' && hashFiles('logs/maestro-exit-code.txt') == ''
         run: |
           pkill -9 -f qemu-system || true
           pkill -9 -f emulator || true
@@ -239,7 +239,7 @@ jobs:
 
       - name: Run E2E tests (retry)
         id: e2e_tests_retry
-        if: steps.e2e_tests.outcome == 'failure'
+        if: steps.e2e_tests.outcome == 'failure' && hashFiles('logs/maestro-exit-code.txt') == ''
         continue-on-error: true
         timeout-minutes: 3
         uses: reactivecircus/android-emulator-runner@v2
