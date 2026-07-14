@@ -11,6 +11,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  check-sonar-token:
+    name: Check SONAR_TOKEN
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      has_token: ${{ steps.check.outputs.has_token }}
+    steps:
+      - name: Check
+        id: check
+        run: echo "has_token=${{ secrets.SONAR_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+
   gitleaks:
     name: Gitleaks
     if: github.event_name == 'pull_request'
@@ -47,8 +58,9 @@ jobs:
 
   sonarcloud:
     name: SonarCloud
+    needs: check-sonar-token
     runs-on: ubuntu-latest
-    if: ${{ secrets.SONAR_TOKEN != '' && github.event_name == 'pull_request' }}
+    if: needs.check-sonar-token.outputs.has_token == 'true'
     steps:
       - uses: actions/checkout@v5
         with:
