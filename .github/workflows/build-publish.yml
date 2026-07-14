@@ -43,6 +43,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      image: ${{ steps.image.outputs.name }}
+      digest: ${{ steps.build.outputs.digest }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -67,3 +70,36 @@ jobs:
           context: server
           push: true
           tags: ${{ steps.image.outputs.name }}:${{ github.event.workflow_run.head_sha }}
+
+  update-manifest:
+    name: Update deployment manifest
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.CD_APP_ID }}
+          private-key: ${{ secrets.CD_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Update manifest
+        id: manifest
+        run: |
+          IMAGE="${{ needs.build-and-push.outputs.image }}@${{ needs.build-and-push.outputs.digest }}"
+          VERSION=$(bash .github/scripts/update-manifest.sh "${{ github.event.workflow_run.head_sha }}" "$IMAGE")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push manifest
+        run: |
+          git config user.name "traderapp-cd-bot[bot]"
+          git config user.email "traderapp-cd-bot[bot]@users.noreply.github.com"
+          git add deploy/manifests/
+          git commit -m "chore(manifest): publish manifest-${{ steps.manifest.outputs.version }}"
+          git push origin HEAD:main
