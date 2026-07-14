@@ -9,8 +9,7 @@ COPY settings.gradle .
 COPY gradle/ gradle/
 COPY gradlew .
 
-RUN chmod +x gradlew
-RUN ./gradlew dependencies --no-daemon -q
+RUN chmod +x gradlew && ./gradlew dependencies --no-daemon -q
 
 COPY src ./src
 RUN ./gradlew bootJar --no-daemon -x test
@@ -21,7 +20,7 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-RUN addgroup -S trader && adduser -S trader -G trader
+RUN apk upgrade --no-cache && addgroup -S trader && adduser -S trader -G trader
 USER trader
 
 # Copy final jar final from builder stage
