@@ -196,7 +196,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-29-x86_64-${{ runner.os }}
+          key: avd-29-x86_64-${{ runner.os }}-v2
 
       - name: Create AVD and warm up snapshot
         if: steps.avd-cache.outputs.cache-hit != 'true'
