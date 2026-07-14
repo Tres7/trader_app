@@ -21,6 +21,8 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
+RUN apk upgrade --no-cache
+
 RUN addgroup -S trader && adduser -S trader -G trader
 USER trader
 
