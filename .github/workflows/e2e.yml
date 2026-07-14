@@ -189,17 +189,7 @@ jobs:
           echo "Login check: $LOGIN"
           [ "$LOGIN" = "200" ] || exit 1
 
-      - name: Cache AVD snapshot
-        uses: actions/cache@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-29-x86_64-${{ runner.os }}-v2
-
       - name: Create AVD and warm up snapshot
-        if: steps.avd-cache.outputs.cache-hit != 'true'
         timeout-minutes: 15
         uses: reactivecircus/android-emulator-runner@v2
         with:
