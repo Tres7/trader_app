@@ -6,7 +6,7 @@ IMAGE="$2"
 
 mkdir -p deploy/manifests
 
-LAST=$(ls deploy/manifests/manifest-*.yaml 2>/dev/null | sed -E 's/.*manifest-([0-9]+\.[0-9]+\.[0-9]+)\.yaml/\1/' | sort -V | tail -1)
+LAST=$(find deploy/manifests -maxdepth 1 -name 'manifest-*.yaml' 2>/dev/null | sed -E 's/.*manifest-([0-9]+\.[0-9]+\.[0-9]+)\.yaml/\1/' | sort -V | tail -1)
 
 if [ -z "$LAST" ]; then
   NEXT="0.0.1"
