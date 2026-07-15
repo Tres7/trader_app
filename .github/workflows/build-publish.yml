@@ -24,12 +24,27 @@ jobs:
       - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
-          fetch-depth: 2
+          fetch-depth: 0
 
-      - name: Check if server changed
+      - name: Find last published commit
+        id: last_published
+        run: |
+          LAST_MANIFEST=$(find deploy/manifests -maxdepth 1 -name 'manifest-*.yaml' 2>/dev/null | sed -E 's/.*manifest-([0-9]+\.[0-9]+\.[0-9]+)\.yaml/\1/' | sort -V | tail -1)
+          if [ -z "$LAST_MANIFEST" ]; then
+            echo "sha=" >> "$GITHUB_OUTPUT"
+          else
+            SHA=$(grep 'sourceRevision:' "deploy/manifests/manifest-${LAST_MANIFEST}.yaml" | awk '{print $2}')
+            echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check if server changed since last publish
         id: filter
         run: |
-          if git diff --name-only HEAD^ HEAD | grep -q '^server/'; then
+          BASE="${{ steps.last_published.outputs.sha }}"
+          if [ -z "$BASE" ]; then
+            BASE=$(git rev-list --max-parents=0 HEAD)
+          fi
+          if git diff --name-only "$BASE" HEAD | grep -q '^server/'; then
             echo "server=true" >> "$GITHUB_OUTPUT"
           else
             echo "server=false" >> "$GITHUB_OUTPUT"
