@@ -44,7 +44,7 @@ jobs:
           IMAGE=$(grep 'image:' "${{ steps.manifest.outputs.path }}" | awk '{print $2}')
           echo "ref=$IMAGE" >> "$GITHUB_OUTPUT"
 
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
