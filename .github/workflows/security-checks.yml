@@ -53,7 +53,7 @@ jobs:
         working-directory: client
 
       - name: Audit
-        run: npm audit --audit-level=high
+        run: node ../.github/scripts/check-npm-audit.js
         working-directory: client
 
   sonarcloud:
