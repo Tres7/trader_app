@@ -19,7 +19,7 @@ jobs:
     outputs:
       client: ${{ steps.filter.outputs.client }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - id: filter
         uses: dorny/paths-filter@v3
@@ -34,7 +34,7 @@ jobs:
     if: needs.changes.outputs.client == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -60,7 +60,7 @@ jobs:
     if: needs.changes.outputs.client == 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:

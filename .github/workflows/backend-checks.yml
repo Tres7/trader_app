@@ -19,7 +19,7 @@ jobs:
     outputs:
       server: ${{ steps.filter.outputs.server }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - id: filter
         uses: dorny/paths-filter@v3
@@ -35,7 +35,7 @@ jobs:
     if: needs.changes.outputs.server == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-java@v4
         with:
@@ -57,7 +57,7 @@ jobs:
     if: needs.changes.outputs.server == 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-java@v4
         with:
@@ -79,7 +79,7 @@ jobs:
     if: needs.changes.outputs.server == 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Check if Dockerfile changed
         id: dockerfile
@@ -101,7 +101,7 @@ jobs:
     if: needs.changes.outputs.server == 'true' && github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Prepare env file for validation
         run: cp server/.env.example server/.env
