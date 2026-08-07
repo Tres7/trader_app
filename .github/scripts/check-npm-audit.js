@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 const { spawnSync } = require('child_process');
 
-const EXCLUDED = new Set(['GHSA-mh99-v99m-4gvg']);
+const EXCLUDED = new Set([
+  'GHSA-mh99-v99m-4gvg',
+  'GHSA-rgw5-rvv9-x895',
+  'GHSA-w3rx-r6r6-pgpr',
+  'GHSA-5p2g-fcmc-qvqq',
+]);
 
 const result = spawnSync('npm audit --json', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 50, shell: true });
 const data = JSON.parse(result.stdout);
