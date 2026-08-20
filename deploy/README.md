@@ -33,7 +33,7 @@ et un backup obligatoire avant chaque déploiement.
    jamais en argument en clair. Persiste dans `~/.docker/config.json`, en dehors
    de `/opt/traderapp/`, jamais touché par la CI.
 7. Dans GitHub (Settings → Secrets and variables → Actions) :
-   - Secrets : `VPS_HOST`, `VPS_USER`, `VPS_SSH_PRIVATE_KEY`, `VPS_SSH_PORT` (si ≠ 22)
+   - Secrets : `VM_HOST`, `VM_USER`, `SSH_PRIVATE_KEY`, `VM_PORT` (si ≠ 22)
    - Variable : `PUBLIC_HOSTNAME` = `<ip-avec-tirets>.sslip.io` (ex. `203-0-113-45.sslip.io`)
 8. Vérifier la connectivité SSH avant de lancer un vrai déploiement (voir plus bas).
 

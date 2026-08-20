@@ -234,10 +234,10 @@ jobs:
       - name: Run remote deploy
         uses: appleboy/ssh-action@<sha épinglé>
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.VPS_SSH_PORT }}
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.VM_PORT }}
           script_stop: true
           envs: SERVER_IMAGE,PUBLIC_HOSTNAME,MANIFEST_VERSION
           script: |
@@ -318,10 +318,10 @@ Nouveau job sibling de `npm-audit`/`trivy`, sans dépendance :
       - name: Run backup on VPS
         uses: appleboy/ssh-action@<sha épinglé>
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.VPS_SSH_PORT }}
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.VM_PORT }}
           script_stop: true
           script: |
             set -a
@@ -334,7 +334,7 @@ Réutilise les mêmes secrets SSH que `deploy.yml`, indépendant de toute logiqu
 
 ## Secrets / variables GitHub à créer manuellement (je ne peux pas les créer)
 
-- Secrets : `VPS_HOST`, `VPS_USER`, `VPS_SSH_PRIVATE_KEY`, `VPS_SSH_PORT` (si ≠ 22)
+- Secrets : `VM_HOST`, `VM_USER`, `SSH_PRIVATE_KEY`, `VM_PORT` (si ≠ 22)
 - Variable (pas secret) : `PUBLIC_HOSTNAME` = `<ip-avec-tirets>.sslip.io`
 
 ## Checklist de mise en place manuelle sur le VPS (avant le premier vrai déploiement)
