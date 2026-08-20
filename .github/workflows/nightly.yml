@@ -58,3 +58,21 @@ jobs:
           exit-code: '1'
           severity: CRITICAL,HIGH
           ignore-unfixed: true
+
+  backup-db:
+    name: Nightly DB backup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run backup on VPS
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT }}
+          script_stop: true
+          script: |
+            set -a
+            . /opt/traderapp/shared/server.env
+            set +a
+            POSTGRES_CONTAINER=traderapp-db sh /opt/traderapp/current/scripts/backup-db.sh
