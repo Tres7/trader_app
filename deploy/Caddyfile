@@ -1,0 +1,6 @@
+{$PUBLIC_HOSTNAME} {
+    @actuator path /actuator*
+    respond @actuator 404
+
+    reverse_proxy server:8080
+}

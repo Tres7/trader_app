@@ -108,3 +108,12 @@ jobs:
 
       - name: Validate compose file
         run: docker compose -f compose.yaml config --quiet
+
+      - name: Validate production compose file
+        run: |
+          mkdir -p /tmp/deploy-check/current /tmp/deploy-check/shared
+          cp deploy/docker-compose.prod.yaml deploy/Caddyfile /tmp/deploy-check/current/
+          cp deploy/server.env.template /tmp/deploy-check/shared/server.env
+          cd /tmp/deploy-check/current
+          printf 'SERVER_IMAGE=nginx:alpine\nPUBLIC_HOSTNAME=test.example.com\n' > .env
+          docker compose --env-file .env -f docker-compose.prod.yaml config --quiet
