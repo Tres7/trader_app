@@ -70,7 +70,6 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.VM_PORT }}
-          script_stop: true
           script: |
             set -a
             . /opt/traderapp/shared/server.env
