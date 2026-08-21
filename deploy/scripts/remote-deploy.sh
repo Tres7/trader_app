@@ -49,7 +49,11 @@ POSTGRES_CONTAINER=traderapp-db sh scripts/backup-db.sh
 
 echo "==> Deploying manifest ${MANIFEST_VERSION} (${SERVER_IMAGE})..."
 # tous services : rabbitmq (~120s) puis server (~130s) sequentiels dans le pire cas -> marge a 280s
-docker compose --env-file .env -f docker-compose.prod.yaml up -d --wait --wait-timeout 280 --remove-orphans
+if ! docker compose --env-file .env -f docker-compose.prod.yaml up -d --wait --wait-timeout 280 --remove-orphans; then
+  echo "==> Deploy failed, dumping recent container logs for diagnosis:" >&2
+  docker compose -f docker-compose.prod.yaml logs --tail 100 server rabbitmq db || true
+  exit 1
+fi
 
 echo "==> Deploy of manifest ${MANIFEST_VERSION} complete."
 
