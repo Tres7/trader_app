@@ -32,10 +32,14 @@ et un backup obligatoire avant chaque déploiement.
    Coller un PAT GitHub classique (scope `read:packages` uniquement) au prompt —
    jamais en argument en clair. Persiste dans `~/.docker/config.json`, en dehors
    de `/opt/traderapp/`, jamais touché par la CI.
-7. Dans GitHub (Settings → Secrets and variables → Actions) :
+7. Installer `rclone` sur le VPS (utilisé par `backup-db.sh` pour uploader vers R2) :
+   ```
+   sudo -v ; curl https://rclone.org/install.sh | sudo bash
+   ```
+8. Dans GitHub (Settings → Secrets and variables → Actions) :
    - Secrets : `VM_HOST`, `VM_USER`, `SSH_PRIVATE_KEY`, `VM_PORT` (si ≠ 22)
    - Variable : `PUBLIC_HOSTNAME` = `<ip-avec-tirets>.sslip.io` (ex. `203-0-113-45.sslip.io`)
-8. Vérifier la connectivité SSH avant de lancer un vrai déploiement (voir plus bas).
+9. Vérifier la connectivité SSH avant de lancer un vrai déploiement (voir plus bas).
 
 ## Arborescence sur le VPS
 

@@ -71,7 +71,13 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.VM_PORT }}
           script: |
+            export PATH="$HOME/bin:$PATH"
             set -a
-            . /opt/traderapp/shared/server.env
+            while IFS='=' read -r key value; do
+              case "$key" in
+                ''|'#'*) continue ;;
+              esac
+              export "$key=$value"
+            done < /opt/traderapp/shared/server.env
             set +a
             POSTGRES_CONTAINER=traderapp-db sh /opt/traderapp/current/scripts/backup-db.sh
