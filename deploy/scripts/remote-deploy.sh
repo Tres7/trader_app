@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 set -eu
 
+# rclone peut vivre dans ~/bin (install sans sudo) plutot que dans le PATH systeme -
+# a inclure explicitement, la session SSH non-interactive ne charge pas ~/.bashrc.
+export PATH="$HOME/bin:$PATH"
+
 require_env() {
   name="$1"; eval "value=\${$name:-}"
   [ -n "$value" ] || { echo "Error: $name is required." >&2; exit 1; }
