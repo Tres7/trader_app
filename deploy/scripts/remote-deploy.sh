@@ -60,14 +60,23 @@ if ! docker compose --env-file .env -f docker-compose.prod.yaml up -d --wait --w
   exit 1
 fi
 
-# `server` n'est recree par Compose que si son image/config a change. Si un run
-# precedent l'a laisse en etat degrade (ex. rabbitmq recree entre-temps sans que
-# server ne reconnecte), le forcer explicitement corrige ca sans jamais toucher
-# db/rabbitmq/caddy (--no-deps).
+# `server` et `caddy` ne sont recrees par Compose que si leur image/config a change.
+# Le Caddyfile est bind-monte (pas dans l'image) : un simple changement de son contenu
+# sur le disque n'est jamais detecte par Compose comme necessitant une recreation, donc
+# `caddy` continuerait a servir l'ancienne config indefiniment sans ce forcage. Meme
+# logique pour `server` (ex. rabbitmq recree entre-temps sans que server ne reconnecte).
+# --no-deps pour ne jamais toucher a db/rabbitmq au passage.
 echo "==> Ensuring server is running fresh..."
 if ! docker compose --env-file .env -f docker-compose.prod.yaml up -d --force-recreate --no-deps --wait --wait-timeout 280 server; then
   echo "==> Server force-recreate failed, dumping logs:" >&2
   docker compose -f docker-compose.prod.yaml logs --tail 100 server || true
+  exit 1
+fi
+
+echo "==> Ensuring caddy is running fresh (picks up Caddyfile changes)..."
+if ! docker compose --env-file .env -f docker-compose.prod.yaml up -d --force-recreate --no-deps caddy; then
+  echo "==> Caddy force-recreate failed, dumping logs:" >&2
+  docker compose -f docker-compose.prod.yaml logs --tail 100 caddy || true
   exit 1
 fi
 
