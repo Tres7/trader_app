@@ -23,6 +23,10 @@ export RCLONE_CONFIG_R2_PROVIDER=Cloudflare
 export RCLONE_CONFIG_R2_ENDPOINT
 export RCLONE_CONFIG_R2_ACCESS_KEY_ID
 export RCLONE_CONFIG_R2_SECRET_ACCESS_KEY
+# Le token R2 n'a que des droits objet (pas de gestion de bucket) : sans ce flag,
+# rclone tente un appel CreateBucket avant l'upload et se prend un Access Denied,
+# meme si le bucket existe deja.
+export RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true
 
 KEEP="${BACKUP_RETENTION:-10}"
 
