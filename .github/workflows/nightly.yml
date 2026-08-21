@@ -77,6 +77,8 @@ jobs:
               case "$key" in
                 ''|'#'*) continue ;;
               esac
+              key=$(printf '%s' "$key" | tr -d '\r')
+              value=$(printf '%s' "$value" | tr -d '\r')
               export "$key=$value"
             done < /opt/traderapp/shared/server.env
             set +a

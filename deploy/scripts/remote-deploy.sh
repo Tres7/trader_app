@@ -34,6 +34,11 @@ while IFS='=' read -r key value; do
   case "$key" in
     ''|'#'*) continue ;;
   esac
+  # Nettoie un eventuel \r en fin de ligne (fichier edite/colle depuis un
+  # environnement Windows) - sinon Compose et Docker peuvent finir par voir
+  # deux versions legerement differentes de la meme valeur.
+  key=$(printf '%s' "$key" | tr -d '\r')
+  value=$(printf '%s' "$value" | tr -d '\r')
   export "$key=$value"
 done < "$SHARED_ENV"
 set +a
