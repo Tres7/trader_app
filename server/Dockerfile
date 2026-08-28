@@ -20,6 +20,9 @@ FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
+# --no-cache refreshes the apk index before upgrading, so a rebuild is what actually
+# pulls in patched Alpine packages (e.g. CVE-2026-14456 in openssl/libssl3/libcrypto3);
+# the running image never patches itself, only a fresh build does.
 RUN apk upgrade --no-cache && addgroup -S trader && adduser -S trader -G trader
 USER trader
 
