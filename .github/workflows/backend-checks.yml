@@ -91,7 +91,7 @@ jobs:
 
       - name: Run Hadolint
         if: steps.dockerfile.outputs.dockerfile == 'true'
-        uses: hadolint/hadolint-action@v3.4.0
+        uses: hadolint/hadolint-action@v3.5.0
         with:
           dockerfile: server/Dockerfile
 
