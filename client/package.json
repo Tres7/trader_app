@@ -76,7 +76,8 @@
     "typescript": "~5.9.2"
   },
   "overrides": {
-    "postcss": "^8.5.18"
+    "postcss": "^8.5.18",
+    "browserslist": "^4.28.7"
   },
   "jest": {
     "preset": "jest-expo"
