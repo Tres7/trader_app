@@ -5,6 +5,7 @@ import { View, Pressable } from 'react-native';
 import { useAuthStore } from '@/src/features/auth/store/auth-store';
 import { Button } from '@/src/shared/ui/primitives/button';
 import { Text } from '@/src/shared/ui/primitives/text';
+import { ThemeToggle } from '@/src/shared/ui/theme-toggle';
 
 export default function ProfileScreen() {
   const logout = useAuthStore((state) => state.logout);
@@ -28,6 +29,10 @@ export default function ProfileScreen() {
           label="Sécurité"
           onPress={() => router.push('/profile/security')}
         />
+      </View>
+
+      <View className="items-center pt-10">
+        <ThemeToggle />
       </View>
 
       <View className="items-center pt-6 mt-auto">
