@@ -64,6 +64,9 @@ configurations.all {
 		if (details.requested.group == 'io.netty') {
 			details.useVersion '4.2.17.Final'
 		}
+		if (details.requested.group == 'org.apache.tomcat.embed') {
+			details.useVersion '11.0.25'
+		}
 	}
 }
 
