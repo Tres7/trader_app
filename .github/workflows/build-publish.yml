@@ -6,7 +6,7 @@ on:
       - main
 
 concurrency:
-  group: build-publish-${{ github.sha }}
+  group: build-publish
   cancel-in-progress: false
 
 jobs:
