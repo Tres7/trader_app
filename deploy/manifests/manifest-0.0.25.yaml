@@ -1,0 +1,7 @@
+schemaVersion: 1
+manifestVersion: 0.0.25
+services:
+  server:
+    version: 0.0.25
+    sourceRevision: 61f333f0e6331a793e5ce717149b36ce0719c7c3
+    image: ghcr.io/tres7/trader_app/server@sha256:547689db1ba13e30b7fa4907f09cb9393f1e34f05c2911dd495126717aafea0d
