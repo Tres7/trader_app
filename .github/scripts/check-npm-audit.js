@@ -6,6 +6,10 @@ const EXCLUDED = new Set([
   'GHSA-rgw5-rvv9-x895',
   'GHSA-w3rx-r6r6-pgpr',
   'GHSA-5p2g-fcmc-qvqq',
+  // braces: no fixed version published upstream yet (3.0.3 is latest on npm)
+  'GHSA-vfj7-8cjw-p6xm',
+  // node-forge: no fixed version published upstream yet (1.4.0 is latest on npm)
+  'GHSA-86w9-cpqp-85rv',
 ]);
 
 const result = spawnSync('npm audit --json', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 50, shell: true });
