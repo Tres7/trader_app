@@ -67,6 +67,14 @@ configurations.all {
 		if (details.requested.group == 'org.apache.tomcat.embed') {
 			details.useVersion '11.0.25'
 		}
+		if (details.requested.group == 'com.fasterxml.jackson.core' &&
+				(details.requested.name == 'jackson-core' || details.requested.name == 'jackson-databind')) {
+			details.useVersion '2.21.7'
+		}
+		if (details.requested.group == 'tools.jackson.core' &&
+				(details.requested.name == 'jackson-core' || details.requested.name == 'jackson-databind')) {
+			details.useVersion '3.1.7'
+		}
 	}
 }
 
