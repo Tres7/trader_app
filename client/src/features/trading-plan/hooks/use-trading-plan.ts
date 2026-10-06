@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { isAxiosError } from 'axios';
 import { getTradingPlan, updateTradingPlan } from "../api/trading-plan-api";
 import { UpdateTradingPlanPayload } from "../model/types";
 import { downloadAsync, documentDirectory, cacheDirectory, getContentUriAsync } from 'expo-file-system/legacy';
@@ -10,11 +11,20 @@ import * as Sharing from 'expo-sharing';
 export const TRADING_PLAN_QUERY_KEY = ['trading-plan'];
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const MAX_RETRIES = 3;
+
+/**
+ * The backend answers 404 when the user has not created a plan yet.
+ */
+export function isPlanNotFoundError(error: unknown): boolean {
+  return isAxiosError(error) && error.response?.status === 404;
+}
 
 export function useGetTradingPlan() {
   return useQuery({
       queryKey: TRADING_PLAN_QUERY_KEY,
       queryFn: getTradingPlan,
+      retry: (failureCount, error) => !isPlanNotFoundError(error) && failureCount < MAX_RETRIES,
   });
 }
 
