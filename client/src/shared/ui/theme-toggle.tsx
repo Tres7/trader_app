@@ -36,31 +36,32 @@ export function ThemeToggle() {
 
   return (
     <View className="items-center gap-2">
-      <View
-        style={{ width: TRACK_WIDTH }}
-        className="flex-row rounded-full border border-border bg-card p-1">
-        <View className="absolute inset-0 flex-row items-center" pointerEvents="none">
-          <Animated.View
-            style={[
-              { width: THUMB_SIZE, height: THUMB_SIZE, backgroundColor: THUMB_COLOR },
-              thumbStyle,
-            ]}
-            className="rounded-full"
-          />
-        </View>
+      <View className="rounded-full border border-border bg-card p-1">
+        {/* Thumb and options share this row so they are positioned from the same origin. */}
+        <View style={{ width: TRACK_WIDTH }} className="flex-row">
+          <View className="absolute inset-0 flex-row items-center" pointerEvents="none">
+            <Animated.View
+              style={[
+                { width: THUMB_SIZE, height: THUMB_SIZE, backgroundColor: THUMB_COLOR },
+                thumbStyle,
+              ]}
+              className="rounded-full"
+            />
+          </View>
 
-        {OPTIONS.map(({ value, Icon, label }) => (
-          <Pressable
-            key={value}
-            accessibilityRole="button"
-            accessibilityLabel={label}
-            accessibilityState={{ selected: preference === value }}
-            onPress={() => setPreference(value)}
-            style={{ width: OPTION_WIDTH }}
-            className="items-center justify-center py-2">
-            <Icon size={20} color={preference === value ? ACTIVE_ICON_COLOR : MUTED_ICON_COLOR} />
-          </Pressable>
-        ))}
+          {OPTIONS.map(({ value, Icon, label }) => (
+            <Pressable
+              key={value}
+              accessibilityRole="button"
+              accessibilityLabel={label}
+              accessibilityState={{ selected: preference === value }}
+              onPress={() => setPreference(value)}
+              style={{ width: OPTION_WIDTH }}
+              className="items-center justify-center py-2">
+              <Icon size={20} color={preference === value ? ACTIVE_ICON_COLOR : MUTED_ICON_COLOR} />
+            </Pressable>
+          ))}
+        </View>
       </View>
 
       <Text className="text-sm text-muted-foreground">Thème</Text>
