@@ -1,9 +1,13 @@
 name: E2E Tests
 
+# Runs on PRs only when they carry the `e2e` label (opt-in for critical changes),
+# every night on main as a safety net, and manually via workflow_dispatch.
+# See docs/frontend/e2e-ci.md.
 on:
   pull_request:
     branches:
       - main
+    types: [labeled, synchronize, reopened]
     paths-ignore:
       - 'deploy/**'
       - '.github/scripts/backup-db.sh'
@@ -12,10 +16,21 @@ on:
       - '.github/workflows/deploy.yml'
       - '.github/workflows/nightly.yml'
       - '**.md'
+  schedule:
+    - cron: '0 2 * * *'
   workflow_dispatch:
+
+# Adding an unrelated label must not cancel a running E2E: such events get their own group.
+concurrency:
+  group: e2e-${{ github.ref }}-${{ (github.event.action == 'labeled' && github.event.label.name != 'e2e') && github.run_id || 'main' }}
+  cancel-in-progress: true
 
 jobs:
   e2e:
+    if: >-
+      github.event_name != 'pull_request' ||
+      (github.event.action == 'labeled' && github.event.label.name == 'e2e') ||
+      (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'e2e'))
     runs-on: ubuntu-latest
     timeout-minutes: 35
 
