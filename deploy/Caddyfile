@@ -1,9 +1,0 @@
-{$PUBLIC_HOSTNAME} {
-    @actuator {
-        path /actuator*
-        not path /actuator/health
-    }
-    respond @actuator 404
-
-    reverse_proxy server:8080
-}

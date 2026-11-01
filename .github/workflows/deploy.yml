@@ -52,7 +52,7 @@ jobs:
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.VM_PORT }}
-          source: "deploy/docker-compose.prod.yaml,deploy/Caddyfile,deploy/scripts"
+          source: "deploy/docker-compose.prod.yaml,deploy/scripts"
           target: "/opt/traderapp/current"
           strip_components: 1
 

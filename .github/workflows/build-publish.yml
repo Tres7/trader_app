@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  # Reconstruit l'image meme sans changement dans server/ : necessaire pour embarquer
+  # les correctifs de l'image de base (apk upgrade) signales par Trivy dans la nightly.
+  workflow_dispatch:
 
 concurrency:
   group: build-publish
@@ -38,7 +41,9 @@ jobs:
           if [ -z "$BASE" ]; then
             BASE=$(git rev-list --max-parents=0 HEAD)
           fi
-          if git diff --name-only "$BASE" HEAD | grep -q '^server/'; then
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "server=true" >> "$GITHUB_OUTPUT"
+          elif git diff --name-only "$BASE" HEAD | grep -q '^server/'; then
             echo "server=true" >> "$GITHUB_OUTPUT"
           else
             echo "server=false" >> "$GITHUB_OUTPUT"

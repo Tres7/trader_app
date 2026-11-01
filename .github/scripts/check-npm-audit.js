@@ -8,8 +8,10 @@ const EXCLUDED = new Set([
   'GHSA-5p2g-fcmc-qvqq',
   // braces: no fixed version published upstream yet (3.0.3 is latest on npm)
   'GHSA-vfj7-8cjw-p6xm',
-  // node-forge: no fixed version published upstream yet (1.4.0 is latest on npm)
-  'GHSA-86w9-cpqp-85rv',
+  // decode-uri-component: fixed only in 0.5.1, which is ESM-only, while query-string@7
+  // (via expo-router) loads it with require() and pins ^0.2.2 - an override would break it
+  'GHSA-vcc3-ghjq-m6fr',
+  'GHSA-qr28-fpjm-wq7f',
 ]);
 
 const result = spawnSync('npm audit --json', { encoding: 'utf8', maxBuffer: 1024 * 1024 * 50, shell: true });

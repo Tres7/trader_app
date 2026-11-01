@@ -1,8 +1,13 @@
 # Déploiement VPS
 
 `deploy.yml` déploie `server` sur le VPS via SSH, en s'appuyant sur les manifests
-versionnés (`deploy/manifests/`), un reverse proxy Caddy (HTTPS auto via sslip.io)
-et un backup obligatoire avant chaque déploiement.
+versionnés (`deploy/manifests/`) et un backup obligatoire avant chaque déploiement.
+
+Le reverse proxy (Caddy, HTTPS auto via sslip.io) n'est **plus géré par ce dépôt** :
+c'est un Caddy partagé entre les projets du VPS, déployé à part. Il joint `server`
+par son nom de conteneur (`traderapp_server:8080`) via le réseau Docker externe
+`proxy`, que `server` rejoint. C'est aussi lui qui bloque `/actuator*` (hors
+`/actuator/health`) côté public.
 
 ## Mise en place manuelle (une seule fois, avant le premier déploiement)
 
@@ -25,6 +30,9 @@ et un backup obligatoire avant chaque déploiement.
    ```
    Ajouter la clé publique à `~/.ssh/authorized_keys` sur le VPS.
 5. Ouvrir le firewall pour les ports 80/443 (et le port SSH si non-standard).
+   Le réseau `proxy` et le Caddy partagé doivent exister avant le premier
+   déploiement : sans le réseau, `docker compose up` échoue (`network proxy declared
+   as external, but could not be found`).
 6. Le package GHCR `server` reste privé. Sur le VPS, une seule fois :
    ```
    docker login ghcr.io -u <ton-user-github>
@@ -60,7 +68,6 @@ et un backup obligatoire avant chaque déploiement.
 /opt/traderapp/
 ├── current/          # écrasé intégralement à chaque déploiement — jetable
 │   ├── docker-compose.prod.yaml
-│   ├── Caddyfile
 │   ├── .env           # régénéré à chaque run (SERVER_IMAGE, PUBLIC_HOSTNAME) — non secret
 │   └── scripts/
 │       ├── remote-deploy.sh
@@ -88,7 +95,7 @@ et un backup obligatoire avant chaque déploiement.
 ## Limites connues
 
 - **Downtime pendant chaque déploiement** (jusqu'à ~2 minutes) : archi
-  mono-instance, pas de blue-green. Caddy renvoie des 502 pendant que `server`
+  mono-instance, pas de blue-green. Le Caddy partagé renvoie des 502 pendant que `server`
   redémarre.
 - **`/actuator/health` valide que l'appli a démarré, pas qu'elle fonctionne
   réellement** (pas de smoke test applicatif après déploiement).
@@ -98,16 +105,15 @@ et un backup obligatoire avant chaque déploiement.
 Pièges réels rencontrés en mettant ce pipeline en place — à vérifier en premier
 avant de creuser plus loin.
 
-### `server` ou `caddy` semble ignorer un changement de config
+### `server` semble ignorer un changement de config
 
 Compose ne recrée un conteneur que si **son image ou sa config déclarée dans le
-compose file** a changé. Un changement de `Caddyfile` (monté en bind-mount, pas
-dans l'image) ou un redéploiement de la même image applicative (ex. plusieurs
-tentatives de debug sans nouveau code) ne déclenche donc **pas** de recréation
-automatique — le conteneur continue de tourner avec son ancienne config en
-mémoire, silencieusement.
+compose file** a changé. Un redéploiement de la même image applicative (ex.
+plusieurs tentatives de debug sans nouveau code) ne déclenche donc **pas** de
+recréation automatique — le conteneur continue de tourner avec son ancienne
+config en mémoire, silencieusement.
 
-`remote-deploy.sh` force déjà la recréation de `server` et `caddy`
+`remote-deploy.sh` force déjà la recréation de `server`
 (`--force-recreate --no-deps`) à chaque déploiement pour cette raison précise.
 Si un souci de ce type apparaît quand même (ex. après une modif manuelle sur le
 VPS), forcer à la main :
@@ -150,9 +156,9 @@ docker exec traderapp-rabbitmq rabbitmqctl authenticate_user <user> <password>
   GitHub `PUBLIC_HOSTNAME` (ex. `217-154-19-172.sslip.io` avec des **tirets** —
   `217.154.19.172.sslip.io` avec des points est un hostname *différent* du point
   de vue de Caddy, donc sans certificat pour lui).
-- Vérifier les logs Caddy pour confirmer l'émetteur du certificat :
+- Vérifier les logs du Caddy partagé pour confirmer l'émetteur du certificat :
   ```bash
-  docker compose -f /opt/traderapp/current/docker-compose.prod.yaml logs caddy --tail 100
+  docker logs <conteneur-caddy-partagé> --tail 100
   ```
   `"issuer":"acme-v02.api.letsencrypt.org-directory"` = vrai certificat Let's Encrypt, tout va bien.
   `"issuer":"local"` = Caddy est retombé sur sa CA interne auto-signée, généralement parce
@@ -167,12 +173,3 @@ docker exec traderapp-rabbitmq rabbitmqctl authenticate_user <user> <password>
 `rclone` n'est pas installé par défaut sur le VPS — voir l'étape 7 de la checklist
 ci-dessus. `remote-deploy.sh` ajoute `~/bin` au `PATH`, donc si `rclone` est
 installé ailleurs, soit l'y déplacer, soit adapter le script.
-
-### Valider le `Caddyfile` sans toucher au VPS
-
-```bash
-docker run --rm -e PUBLIC_HOSTNAME=test.example.com -v "$(pwd)/deploy/Caddyfile:/etc/caddy/Caddyfile" caddy:2-alpine caddy validate --config /etc/caddy/Caddyfile
-```
-`PUBLIC_HOSTNAME` doit être défini, sinon Caddy interprète mal tout le fichier
-(le bloc de site devient vide, les matchers sont lus comme des options globales
-invalides).
